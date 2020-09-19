@@ -1,0 +1,23 @@
+{
+  "name": "video-sharing-frontend",
+  "version": "1.0.0",
+  "description": "a simple video sharing platform proof of concept",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Dejanvuk/video-sharing-platform-poc.git"
+  },
+  "keywords": [
+    "video",
+    "sharing"
+  ],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Dejanvuk/video-sharing-platform-poc/issues"
+  },
+  "homepage": "https://github.com/Dejanvuk/video-sharing-platform-poc#readme"
+}
