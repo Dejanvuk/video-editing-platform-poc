@@ -1,0 +1,8 @@
+jwt:
+  JWT_SECRET = c4GS/lhQPY+0k8S9WsDxRUI7ld2tK/BpeFJGRuoGvck4uQqAEa2Dd6LaFaPqnzzTAbB4F/XUbeagL7vGCPkXr8I2S+37HaBRD5+Oagil4artuSbjo/M9D1C3Uec7zxZneare1dcy/pL6qAJUbqn+n1rsWJ3
+  TOKEN_HEADER = Authorization
+  TOKEN_PREFIX =  Bearer
+  TOKEN_TYPE = JWT
+  EXPIRATION_TIME = 64000000
+  TOKEN_ISSUER = user-microservice
+  TOKEN_AUDIENCE = "users"
