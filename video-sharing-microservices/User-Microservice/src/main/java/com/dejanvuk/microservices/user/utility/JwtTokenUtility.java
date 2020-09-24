@@ -57,29 +57,7 @@ public class JwtTokenUtility {
         return token;
     }
 
-    public UsernamePasswordAuthenticationToken getUsernamePasswordAuthenticationTokenFromJwt(String jwt) {
-        try {
-            var jwtBody = Jwts.parser().setSigningKey(jwtProps.getJWT_SECRET()).parseClaimsJws(jwt.replace("Bearer ", "")).getBody();
-            String username = jwtBody.getSubject();
-            UserEntity user = userRepository.findByUsernameOrEmail(username, username).orElseThrow(() -> new UsernameNotFoundException("Username or email doesn't exist! " + username));
-            Set<GrantedAuthority> roles = user.getRoles().stream().map(role -> new SimpleGrantedAuthority(role.getName().name())).collect(Collectors.toSet());
-
-            CustomUserDetails currentUser = new CustomUserDetails(user.getId(),user.getName(),user.getUsername(),user.getEmail(),user.getPassword(),user.getVerified(), roles, null);
-            return new UsernamePasswordAuthenticationToken(currentUser, null, roles);
-        } catch (ExpiredJwtException exception) {
-            log.warn("Request to parse expired JWT : {} failed : {}", jwt, exception.getMessage());
-        } catch (UnsupportedJwtException exception) {
-            log.warn("Request to parse unsupported JWT : {} failed : {}", jwt, exception.getMessage());
-        } catch (MalformedJwtException exception) {
-            log.warn("Request to parse invalid JWT : {} failed : {}", jwt, exception.getMessage());
-        } catch (SignatureException exception) {
-            log.warn("Request to parse JWT with invalid signature : {} failed : {}", jwt, exception.getMessage());
-        } catch (IllegalArgumentException exception) {
-            log.warn("Request to parse empty or null JWT : {} failed : {}", jwt, exception.getMessage());
-        }
-        return null;
-    }
-
+    /*
     public String validateToken(String token) {
         String status = "";
 
@@ -99,6 +77,8 @@ public class JwtTokenUtility {
 
         return status;
     }
+    */
+
 
     public Boolean isTokenExpired(String token) {
         var jwtBody = Jwts.parser().setSigningKey(jwtProps.getJWT_SECRET()).parseClaimsJws(token).getBody();

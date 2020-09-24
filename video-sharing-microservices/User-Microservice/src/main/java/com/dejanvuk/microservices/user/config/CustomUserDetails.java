@@ -11,7 +11,7 @@ import java.util.Set;
 
 public class CustomUserDetails implements OAuth2User, UserDetails {
 
-    private Long id;
+    private String id;
 
     private String name;
 
@@ -31,7 +31,7 @@ public class CustomUserDetails implements OAuth2User, UserDetails {
     //@JsonIgnore
     private Map<String, Object> attributes;
 
-    public CustomUserDetails(Long id, String name, String username, String email, String password, Boolean isEnabled,
+    public CustomUserDetails(String id, String name, String username, String email, String password, Boolean isEnabled,
                              Set<GrantedAuthority> authorities, Map<String, Object> attributes) {
         super();
         this.id = id;
@@ -44,7 +44,7 @@ public class CustomUserDetails implements OAuth2User, UserDetails {
         this.attributes = attributes;
     }
 
-    public Long getId() {
+    public String getId() {
         return id;
     }
 
