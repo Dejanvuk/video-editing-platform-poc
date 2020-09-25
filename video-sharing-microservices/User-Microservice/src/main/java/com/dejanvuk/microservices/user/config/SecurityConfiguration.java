@@ -1,8 +1,10 @@
 package com.dejanvuk.microservices.user.config;
 
 import com.dejanvuk.microservices.user.services.CustomReactiveUserDetailsService;
+import com.dejanvuk.microservices.user.utility.JwtTokenUtility;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.codec.json.AbstractJackson2Decoder;
@@ -19,20 +21,35 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.server.SecurityWebFilterChain;
 import org.springframework.security.web.server.authentication.AuthenticationWebFilter;
 import org.springframework.security.web.server.context.NoOpServerSecurityContextRepository;
+import org.springframework.security.web.server.context.ServerSecurityContextRepository;
+import org.springframework.security.web.server.context.WebSessionServerSecurityContextRepository;
 import org.springframework.security.web.server.util.matcher.ServerWebExchangeMatchers;
+import reactor.core.publisher.Mono;
 
 @EnableWebFluxSecurity
 @EnableReactiveMethodSecurity
 public class SecurityConfiguration {
 
+    @Value("${app.AUTH_SIGNIN_URL}")
+    private String authSigninUrl;
+
+    @Value("${jwt.TOKEN_HEADER}")
+    private String RESPONSE_HEADER;
+
+    @Value("${jwt.TOKEN_PREFIX}")
+    private String TOKEN_PREFIX;
+
     @Autowired
-    CustomReactiveUserDetailsService userDetailsService;
+    private JwtTokenUtility jwtTokenUtility;
+
+    @Autowired
+    private CustomReactiveUserDetailsService userDetailsService;
 
     @Autowired
     private ObjectMapper mapper;
 
     @Autowired
-    CustomServerAuthenticationConverter customServerAuthenticationConverter;
+    private CustomServerAuthenticationConverter customServerAuthenticationConverter;
 
     @Bean
     AbstractJackson2Decoder jacksonDecoder() {
@@ -60,13 +77,19 @@ public class SecurityConfiguration {
 
         NoOpServerSecurityContextRepository sessionConfig = NoOpServerSecurityContextRepository.getInstance();
 
-        filter.setSecurityContextRepository(sessionConfig); // stateless sessions, clients must send Authorization header with every request
-        filter.setServerAuthenticationConverter(customServerAuthenticationConverter); // requests are sent in POST body
+        //filter.setSecurityContextRepository(sessionConfig); // stateless sessions, clients must send Authorization header with every request
+        filter.setServerAuthenticationConverter(customServerAuthenticationConverter);
         filter.setRequiresAuthenticationMatcher(
-                ServerWebExchangeMatchers.pathMatchers(HttpMethod.POST, "/signin")
+                ServerWebExchangeMatchers.pathMatchers(HttpMethod.POST, authSigninUrl)
         );
 
         // set success and failure handlers
+        filter.setAuthenticationSuccessHandler((webFilterExchange, authentication) -> {
+            //Set the value of the #AUTHORIZATION header to the given Bearer token.
+            webFilterExchange.getExchange().getResponse().getHeaders().setBearerAuth(jwtTokenUtility.generateToken(authentication));
+            return Mono.empty();
+        });
+
 
         return filter;
     }

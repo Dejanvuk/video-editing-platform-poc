@@ -1,16 +1,16 @@
 package com.dejanvuk.microservices.user.persistence;
 
-import lombok.Data;
-import lombok.RequiredArgsConstructor;
+import lombok.*;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
-@Data
-@RequiredArgsConstructor
+@Getter
+@Setter
 @Document(collection = "roles")
 public class Role {
     @Id
-    private Long id;
+    @Setter(AccessLevel.NONE)
+    private String id;
 
     private RoleType name;
 }

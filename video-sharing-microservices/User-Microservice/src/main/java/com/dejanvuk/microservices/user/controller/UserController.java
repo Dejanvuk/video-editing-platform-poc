@@ -1,20 +1,12 @@
 package com.dejanvuk.microservices.user.controller;
 
-import com.dejanvuk.microservices.user.config.CustomUserDetails;
 import com.dejanvuk.microservices.user.payload.SignUpPayload;
-import com.dejanvuk.microservices.user.persistence.UserEntity;
-import com.dejanvuk.microservices.user.response.UserResponse;
-import com.dejanvuk.microservices.user.services.BindingResultValidationService;
 import com.dejanvuk.microservices.user.services.UserService;
 import com.dejanvuk.microservices.user.utility.JwtTokenUtility;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.validation.BindingResult;
-import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
@@ -22,8 +14,10 @@ import org.springframework.web.util.UriComponents;
 import org.springframework.web.util.UriComponentsBuilder;
 import reactor.core.publisher.Mono;
 
-import javax.validation.Valid;
+import javax.validation.*;
+import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 
 @RestController
 public class UserController {
@@ -34,27 +28,24 @@ public class UserController {
     PasswordEncoder passwordEncoder;
 
     @Autowired
-    BindingResultValidationService bindingResultValidationService;
-
-    @Autowired
     JwtTokenUtility jwtTokenUtility;
 
 
-    @PostMapping("${app.AUTH_SIGN_UP_URL}")
-    ResponseEntity<?> registerUser(@Valid @RequestBody SignUpPayload signUpPayload, BindingResult bindingResult, UriComponentsBuilder b) {
+    @PostMapping(path = "${app.AUTH_SIGNUP_URL}", consumes = "application/json", produces = "application/json")
+    Mono<?> registerUser(@RequestBody SignUpPayload signUpPayload, UriComponentsBuilder b) {
 
-        ResponseEntity<Mono<Map<String, String>>> errors = bindingResultValidationService.validateResult(bindingResult);
+        Mono<ResponseEntity<Map<String, String>>> errors = validateSignUpResult(signUpPayload);
         if(errors != null) return errors;
-        ResponseEntity<?> validationErrors = userService.checkForDuplicates(signUpPayload);
-        if(validationErrors != null) return validationErrors;
-
-        userService.create(signUpPayload);
-
-        // Send verification email
-        //amazonSesService.sendVerificationEmail(user);
-
-        UriComponents location = b.path("/").buildAndExpand();
-        return ResponseEntity.created(location.toUri()).body("User created succesfully!");
+        return userService.checkForDuplicates(signUpPayload).flatMap(exists -> {
+            if(exists) return Mono.just(new ResponseEntity<>("User already exists!", HttpStatus.UNPROCESSABLE_ENTITY));
+            else {
+                return userService.create(signUpPayload).flatMap(user -> {
+                    // Send verification email
+                    //amazonSesService.sendVerificationEmail(user);
+                    return Mono.just(new ResponseEntity<>("User created succesfully!", HttpStatus.CREATED));
+                });
+            }
+        });
     }
 
     /*
@@ -79,5 +70,22 @@ public class UserController {
         }
 
         return sb.toString();
+    }
+
+    private Mono<ResponseEntity<Map<String, String>>> validateSignUpResult(SignUpPayload signUpPayload) {
+        ValidatorFactory factory = Validation.buildDefaultValidatorFactory();
+        Validator validator = factory.getValidator();
+
+        Set<ConstraintViolation<SignUpPayload>> violations = validator.validate(signUpPayload);
+
+        if(violations.size() == 0) return null;
+
+        Map<String,String> errorMap = new HashMap<>();
+
+        for (ConstraintViolation<SignUpPayload > violation : violations) {
+            errorMap.put(violation.getInvalidValue().toString(), violation.getMessage());
+        }
+
+        return Mono.just(new ResponseEntity<>(errorMap, HttpStatus.BAD_REQUEST));
     }
 }

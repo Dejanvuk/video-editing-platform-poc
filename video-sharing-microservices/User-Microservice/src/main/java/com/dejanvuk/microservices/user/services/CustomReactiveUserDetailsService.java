@@ -27,10 +27,10 @@ public class CustomReactiveUserDetailsService implements ReactiveUserDetailsServ
         Mono<CustomUserDetails> customUser = userRepository.findByUsernameOrEmail(s, s).switchIfEmpty(error(() -> new UsernameNotFoundException("Username or email dont exist! " + s))).log().map(
                 user -> {
                     Set<GrantedAuthority> authorities = user.getRoles().stream().map(role -> new SimpleGrantedAuthority(role.getName().name())).collect(Collectors.toSet());
-                    return new CustomUserDetails(user.getId(),user.getName(), user.getUsername(), user.getEmail(), user.getPassword(),user.getVerified(), authorities, null);
+                    return new CustomUserDetails(user.getId(),user.getName(), user.getUsername(), user.getEmail(), user.getPassword(),true, authorities, null);
                 }
         );
         // needs testing
-        return customUser.cast(UserDetails.class);
+        return customUser.cast(UserDetails.class).log();
     }
 }

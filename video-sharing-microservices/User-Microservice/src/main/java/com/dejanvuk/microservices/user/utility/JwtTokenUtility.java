@@ -9,6 +9,7 @@ import io.jsonwebtoken.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
@@ -16,43 +17,51 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Component;
 
-import java.util.Date;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Component
 public class JwtTokenUtility {
-    @Autowired
-    JwtProperties jwtProps;
+    @Value("${jwt.EXPIRATION_TIME}")
+    private Long EXPIRATION_TIME;
+
+    @Value("${jwt.TOKEN_AUDIENCE}")
+    private String TOKEN_AUDIENCE;
+
+    @Value("${jwt.TOKEN_ISSUER}")
+    private String TOKEN_ISSUER;
+
+    @Value("${jwt.JWT_SECRET}")
+    private String JWT_SECRET;
+
     private static final Logger log = LoggerFactory.getLogger(JwtTokenUtility.class);
 
     @Autowired
     UserRepository userRepository;
 
     public String generateToken(Authentication authentication) {
-        Date expireDate = new Date(new Date().getTime() + jwtProps.getEXPIRATION_TIME());
+        Date expireDate = new Date(new Date().getTime() + EXPIRATION_TIME);
         CustomUserDetails user = (CustomUserDetails) authentication.getPrincipal();
         String token = Jwts.builder()
                 .setSubject(user.getUsername())
                 .setIssuedAt(new Date())
                 .setExpiration(expireDate)
-                .setAudience(jwtProps.getTOKEN_AUDIENCE())
-                .setIssuer(jwtProps.getTOKEN_ISSUER())
-                .signWith(SignatureAlgorithm.HS512, jwtProps.getJWT_SECRET())
+                .setAudience(TOKEN_AUDIENCE)
+                .setIssuer( TOKEN_ISSUER)
+                .signWith(SignatureAlgorithm.HS512, JWT_SECRET)
                 .compact();
         return token;
     }
 
     public String generateTokenByEmail(String email) {
-        Date expireDate = new Date(new Date().getTime() + jwtProps.getEXPIRATION_TIME());
+        Date expireDate = new Date(new Date().getTime() + EXPIRATION_TIME);
         String token = Jwts.builder()
                 .setSubject(email)
                 .setIssuedAt(new Date())
                 .setExpiration(expireDate)
-                .setAudience(jwtProps.getTOKEN_AUDIENCE())
-                .setIssuer(jwtProps.getTOKEN_ISSUER())
-                .signWith(SignatureAlgorithm.HS512, jwtProps.getJWT_SECRET())
+                .setAudience(TOKEN_AUDIENCE)
+                .setIssuer(TOKEN_ISSUER)
+                .signWith(SignatureAlgorithm.HS512, JWT_SECRET)
                 .compact();
         return token;
     }
@@ -81,9 +90,17 @@ public class JwtTokenUtility {
 
 
     public Boolean isTokenExpired(String token) {
-        var jwtBody = Jwts.parser().setSigningKey(jwtProps.getJWT_SECRET()).parseClaimsJws(token).getBody();
+        var jwtBody = Jwts.parser().setSigningKey(JWT_SECRET).parseClaimsJws(token).getBody();
         Date expirationTime = jwtBody.getExpiration();
         Date todayTime = new Date();
         return expirationTime.before(todayTime);
     }
+
+    /*
+    Date getDate() {
+        Calendar cal = Calendar.getInstance();
+        cal.setTimeInMillis(System.currentTimeMillis());
+        return cal.getTime();
+    }
+    */
 }

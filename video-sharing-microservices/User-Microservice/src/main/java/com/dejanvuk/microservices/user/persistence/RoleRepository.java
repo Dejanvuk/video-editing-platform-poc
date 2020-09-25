@@ -5,6 +5,6 @@ import org.springframework.stereotype.Repository;
 import reactor.core.publisher.Mono;
 
 @Repository
-public interface RoleRepository extends ReactiveMongoRepository<Role, Long> {
+public interface RoleRepository extends ReactiveMongoRepository<Role, String> {
     Mono<Role> findByName(RoleType roleName);
 }

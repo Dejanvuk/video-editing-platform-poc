@@ -17,6 +17,7 @@ public interface UserRepository extends ReactiveMongoRepository<UserEntity, Stri
     */
 
     Mono<UserEntity> findByUsernameOrEmail(String username, String email);
+    Mono<Boolean> existsByUsernameOrEmail(String username, String email);
     Mono<Boolean> existsByUsername(String username);
     Mono<Boolean> existsByEmail(String email);
 }

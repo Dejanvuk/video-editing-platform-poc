@@ -1,6 +1,7 @@
 package com.dejanvuk.microservices.user.services;
 
 import com.dejanvuk.microservices.user.payload.SignUpPayload;
+import com.dejanvuk.microservices.user.persistence.UserEntity;
 import com.dejanvuk.microservices.user.response.UserResponse;
 import org.springframework.http.ResponseEntity;
 import reactor.core.publisher.Flux;
@@ -9,7 +10,7 @@ import reactor.core.publisher.Mono;
 import java.util.List;
 
 public interface IUserService {
-    void create(SignUpPayload signUpPayload);
+    Mono<UserEntity> create(SignUpPayload signUpPayload);
 
     Mono<UserResponse> findById(String id);
 
@@ -21,5 +22,5 @@ public interface IUserService {
 
     Mono<Void> delete(Long id);
 
-    ResponseEntity<Mono<List<String>>> checkForDuplicates(SignUpPayload signUpPayload);
+    Mono<Boolean> checkForDuplicates(SignUpPayload signUpPayload);
 }

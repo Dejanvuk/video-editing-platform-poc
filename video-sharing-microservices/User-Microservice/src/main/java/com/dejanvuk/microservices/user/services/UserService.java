@@ -38,7 +38,9 @@ public class UserService implements IUserService{
     UserEntityMapper userEntityMapper;
 
     @Override
-    public void create(SignUpPayload signUpPayload) {
+    public Mono<UserEntity> create(SignUpPayload signUpPayload) {
+        System.out.println("========INSIDE USERS SERVICE=========");
+
         UserEntity user = new UserEntity();
         user.setUsername(signUpPayload.getUsername());
         user.setEmail(signUpPayload.getEmail());
@@ -48,12 +50,13 @@ public class UserService implements IUserService{
         user.setVerified(false);
         user.setToken(jwtTokenUtility.generateTokenByEmail(signUpPayload.getEmail()));
 
-        Role role = roleRepository.findByName(RoleType.ROLE_USER).block();
-        user.setRoles(Collections.singleton(role));
-
-        System.out.println(user);
-
-        userRepository.save(user);
+        return roleRepository.findByName(RoleType.ROLE_USER).flatMap(role -> {
+            user.setRoles(Collections.singleton(role));
+            System.out.println("========PRINTING USER=========");
+            System.out.println(user);
+            System.out.println("========DONE=========");
+            return userRepository.save(user);
+        });
     }
 
     @Override
@@ -77,15 +80,8 @@ public class UserService implements IUserService{
     }
 
     @Override
-    public ResponseEntity<Mono<List<String>>> checkForDuplicates(SignUpPayload signUpPayload) {
-        List<String> duplicatesList= new ArrayList<String>();
-        if(userRepository.existsByUsername(signUpPayload.getUsername()).block()) {
-            duplicatesList.add("Username is already taken!");
-        }
-        if(userRepository.existsByEmail(signUpPayload.getEmail()).block()) {
-            duplicatesList.add("Email is already taken!");
-        }
-        return (!duplicatesList.isEmpty()) ? new ResponseEntity<>(Mono.just(duplicatesList), HttpStatus.UNPROCESSABLE_ENTITY) : null;
+    public Mono<Boolean> checkForDuplicates(SignUpPayload signUpPayload) {
+        return userRepository.existsByUsernameOrEmail(signUpPayload.getUsername(), signUpPayload.getEmail());
     }
 
 

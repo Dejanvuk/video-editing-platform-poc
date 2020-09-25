@@ -1,0 +1,29 @@
+server:
+    application.name: user-microservice
+    port: 7000
+
+spring.data.mongodb:
+    host: localhost
+    port: 27017
+    database: users-db
+
+app:
+    AUTH_SIGNIN_URL: /auth/signin
+    AUTH_SIGNUP_URL: /auth/sign-up
+    RESPONSE_HEADER: Authorization
+
+jwt:
+    JWT_SECRET:  c4GS/lhQPY+0k8S9WsDxRUI7ld2tK/BpeFJGRuoGvck4uQqAEa2Dd6LaFaPqnzzTAbB4F/XUbeagL7vGCPkXr8I2S+37HaBRD5+Oagil4artuSbjo/M9D1C3Uec7zxZneare1dcy/pL6qAJUbqn+n1rsWJ3
+    TOKEN_HEADER: Authorization
+    TOKEN_PREFIX: Bearer
+    TOKEN_TYPE: JWT
+    EXPIRATION_TIME: 64000000
+    TOKEN_ISSUER: user-microservice
+    TOKEN_AUDIENCE: users
+
+---
+spring.profiles: docker-compose
+
+server.port: 8080
+
+spring.data.mongodb.host: mongodb

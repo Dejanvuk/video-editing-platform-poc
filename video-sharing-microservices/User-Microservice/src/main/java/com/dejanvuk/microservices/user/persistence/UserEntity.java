@@ -1,8 +1,7 @@
 package com.dejanvuk.microservices.user.persistence;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
-import lombok.Data;
-import lombok.RequiredArgsConstructor;
+import lombok.*;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.annotation.LastModifiedDate;
@@ -19,10 +18,11 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-@Data
-@RequiredArgsConstructor
+@Getter
+@Setter
 @Document(collection="users")
 public class UserEntity {
+    @Setter(AccessLevel.NONE)
     @Id
     private String id;
 
