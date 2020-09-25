@@ -39,7 +39,6 @@ public class UserService implements IUserService{
 
     @Override
     public Mono<UserEntity> create(SignUpPayload signUpPayload) {
-        System.out.println("========INSIDE USERS SERVICE=========");
 
         UserEntity user = new UserEntity();
         user.setUsername(signUpPayload.getUsername());
@@ -52,9 +51,7 @@ public class UserService implements IUserService{
 
         return roleRepository.findByName(RoleType.ROLE_USER).flatMap(role -> {
             user.setRoles(Collections.singleton(role));
-            System.out.println("========PRINTING USER=========");
             System.out.println(user);
-            System.out.println("========DONE=========");
             return userRepository.save(user);
         });
     }

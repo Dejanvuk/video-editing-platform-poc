@@ -12,7 +12,6 @@ import org.springframework.http.codec.json.Jackson2JsonDecoder;
 import org.springframework.security.authentication.ReactiveAuthenticationManager;
 import org.springframework.security.authentication.UserDetailsRepositoryReactiveAuthenticationManager;
 import org.springframework.security.config.annotation.method.configuration.EnableReactiveMethodSecurity;
-import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.config.annotation.web.reactive.EnableWebFluxSecurity;
 import org.springframework.security.config.web.server.SecurityWebFiltersOrder;
 import org.springframework.security.config.web.server.ServerHttpSecurity;
@@ -20,9 +19,8 @@ import org.springframework.security.crypto.factory.PasswordEncoderFactories;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.server.SecurityWebFilterChain;
 import org.springframework.security.web.server.authentication.AuthenticationWebFilter;
+import org.springframework.security.web.server.authorization.AuthorizationWebFilter;
 import org.springframework.security.web.server.context.NoOpServerSecurityContextRepository;
-import org.springframework.security.web.server.context.ServerSecurityContextRepository;
-import org.springframework.security.web.server.context.WebSessionServerSecurityContextRepository;
 import org.springframework.security.web.server.util.matcher.ServerWebExchangeMatchers;
 import reactor.core.publisher.Mono;
 
@@ -51,6 +49,9 @@ public class SecurityConfiguration {
     @Autowired
     private CustomServerAuthenticationConverter customServerAuthenticationConverter;
 
+    @Autowired
+    JwtAuthorizationFilter jwtAuthorizationFilter;
+
     @Bean
     AbstractJackson2Decoder jacksonDecoder() {
         return new Jackson2JsonDecoder();
@@ -75,13 +76,14 @@ public class SecurityConfiguration {
     public AuthenticationWebFilter authenticationWebFilter() {
         AuthenticationWebFilter filter = new AuthenticationWebFilter(reactiveAuthenticationManager());
 
-        NoOpServerSecurityContextRepository sessionConfig = NoOpServerSecurityContextRepository.getInstance();
-
-        //filter.setSecurityContextRepository(sessionConfig); // stateless sessions, clients must send Authorization header with every request
         filter.setServerAuthenticationConverter(customServerAuthenticationConverter);
         filter.setRequiresAuthenticationMatcher(
                 ServerWebExchangeMatchers.pathMatchers(HttpMethod.POST, authSigninUrl)
         );
+
+        NoOpServerSecurityContextRepository sessionConfig = NoOpServerSecurityContextRepository.getInstance();
+
+        filter.setSecurityContextRepository(sessionConfig);
 
         // set success and failure handlers
         filter.setAuthenticationSuccessHandler((webFilterExchange, authentication) -> {
@@ -93,7 +95,6 @@ public class SecurityConfiguration {
 
         return filter;
     }
-
 
     /*
     @Autowired
@@ -119,6 +120,8 @@ public class SecurityConfiguration {
 
         http.authenticationManager(reactiveAuthenticationManager());
 
+        http.securityContextRepository(NoOpServerSecurityContextRepository.getInstance()); // stateless sessions, clients must send Authorization header with every request
+
         http.authorizeExchange()
                 .pathMatchers("/", "/favicon.ico", "/**/*.png", "/**/*.gif", "/**/*.svg", "/**/*.jpg", "/**/*.html", "/**/*.css", "/**/*.js").permitAll()
                 .pathMatchers("/auth/**", "/oauth2/**").permitAll()
@@ -136,7 +139,7 @@ public class SecurityConfiguration {
          */
 
         http.addFilterAfter(authenticationWebFilter(),SecurityWebFiltersOrder.AUTHENTICATION);
-        //http.addFilterAfter(authorizationWebFilter(), SecurityWebFiltersOrder.AUTHORIZATION);
+        http.addFilterBefore(jwtAuthorizationFilter, SecurityWebFiltersOrder.HTTP_BASIC);
 
         return http.build();
     }

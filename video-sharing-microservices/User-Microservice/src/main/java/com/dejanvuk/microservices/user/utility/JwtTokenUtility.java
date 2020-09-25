@@ -16,6 +16,7 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Component;
+import reactor.core.publisher.Mono;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -64,6 +65,30 @@ public class JwtTokenUtility {
                 .signWith(SignatureAlgorithm.HS512, JWT_SECRET)
                 .compact();
         return token;
+    }
+
+    public Mono<UsernamePasswordAuthenticationToken> getUsernamePasswordAuthenticationTokenFromJwt(String jwt) {
+        try {
+            var jwtBody = Jwts.parser().setSigningKey(JWT_SECRET).parseClaimsJws(jwt.replace("Bearer ", "")).getBody();
+            String username = jwtBody.getSubject();
+            return userRepository.findByUsernameOrEmail(username, username).switchIfEmpty(Mono.error(new UsernameNotFoundException("Username or email dont exist! " + username)))
+                    .flatMap(user -> {
+                        Set<GrantedAuthority> roles = user.getRoles().stream().map(role -> new SimpleGrantedAuthority(role.getName().name())).collect(Collectors.toSet());
+                        CustomUserDetails currentUser = new CustomUserDetails(user.getId(),user.getName(),user.getUsername(),user.getEmail(),user.getPassword(),user.getVerified(), roles, null);
+                        return Mono.just(new UsernamePasswordAuthenticationToken(currentUser, null, roles));
+                    });
+        } catch (ExpiredJwtException exception) {
+            log.warn("Request to parse expired JWT : {} failed : {}", jwt, exception.getMessage());
+        } catch (UnsupportedJwtException exception) {
+            log.warn("Request to parse unsupported JWT : {} failed : {}", jwt, exception.getMessage());
+        } catch (MalformedJwtException exception) {
+            log.warn("Request to parse invalid JWT : {} failed : {}", jwt, exception.getMessage());
+        } catch (SignatureException exception) {
+            log.warn("Request to parse JWT with invalid signature : {} failed : {}", jwt, exception.getMessage());
+        } catch (IllegalArgumentException exception) {
+            log.warn("Request to parse empty or null JWT : {} failed : {}", jwt, exception.getMessage());
+        }
+        return null;
     }
 
     /*

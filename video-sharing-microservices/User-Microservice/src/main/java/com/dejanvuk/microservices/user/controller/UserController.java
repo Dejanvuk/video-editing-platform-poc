@@ -1,12 +1,19 @@
 package com.dejanvuk.microservices.user.controller;
 
+import com.dejanvuk.microservices.user.config.CustomUserDetails;
+import com.dejanvuk.microservices.user.mappers.UserEntityMapper;
 import com.dejanvuk.microservices.user.payload.SignUpPayload;
+import com.dejanvuk.microservices.user.persistence.UserEntity;
+import com.dejanvuk.microservices.user.response.UserResponse;
 import com.dejanvuk.microservices.user.services.UserService;
 import com.dejanvuk.microservices.user.utility.JwtTokenUtility;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
@@ -30,6 +37,9 @@ public class UserController {
     @Autowired
     JwtTokenUtility jwtTokenUtility;
 
+    @Autowired
+    UserEntityMapper userEntityMapper;
+
 
     @PostMapping(path = "${app.AUTH_SIGNUP_URL}", consumes = "application/json", produces = "application/json")
     Mono<?> registerUser(@RequestBody SignUpPayload signUpPayload, UriComponentsBuilder b) {
@@ -48,14 +58,13 @@ public class UserController {
         });
     }
 
-    /*
+
     @GetMapping("/user/me")
     @PreAuthorize("hasRole('USER')")
-    ResponseEntity<Mono<UserResponse>> getCurrentLoggedInUser(@AuthenticationPrincipal Mono<CustomUserDetails> currentUser) {
-        Mono<UserEntity> user = userService.findById(currentUser.getId()).map(e -> );
-        return new ResponseEntity<>(user, HttpStatus.OK);
+    Mono<ResponseEntity<UserResponse>> getCurrentLoggedInUser(@AuthenticationPrincipal Mono<CustomUserDetails> currentUserMono) {
+        return currentUserMono.flatMap(currentUser -> userService.findById(currentUser.getId()).map(userResponse -> new ResponseEntity<>(userResponse, HttpStatus.OK)));
     }
-    */
+
 
     public String generateRandomString(int n)
     {
