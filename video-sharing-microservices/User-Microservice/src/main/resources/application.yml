@@ -21,6 +21,23 @@ jwt:
     TOKEN_ISSUER: user-microservice
     TOKEN_AUDIENCE: users
 
+spring:
+    security:
+        oauth2:
+            client:
+                registration:
+                    facebook:
+                        clientId: 1605797062885242
+                        clientSecret: 4d4b01b2abe33281e4204153f96154db
+                        scope:
+                            - email
+                            - public_profile
+                provider:
+                    facebook:
+                        authorizationUri: https://www.facebook.com/v8.0/dialog/oauth
+                        tokenUri: https://graph.facebook.com/v8.0/oauth/access_token
+                        userInfoUri: https://graph.facebook.com/v8.0/me?fields=id,first_name,middle_name,last_name,name,email,verified,is_verified,picture.width(250).height(250)
+
 ---
 spring.profiles: docker-compose
 

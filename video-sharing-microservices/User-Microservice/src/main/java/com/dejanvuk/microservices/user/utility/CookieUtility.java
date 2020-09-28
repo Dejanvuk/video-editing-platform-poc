@@ -13,7 +13,7 @@ import java.util.List;
 
 @Component
 public class CookieUtility {
-    public String getCookieValue(ServerHttpRequest request, MultiValueMap<String, HttpCookie> cookieMap, String cookieName) {
+    public String getCookieValue(MultiValueMap<String, HttpCookie> cookieMap, String cookieName) {
         List<HttpCookie> cookies = cookieMap.get(cookieName);
         if (cookies == null) {
             return null;

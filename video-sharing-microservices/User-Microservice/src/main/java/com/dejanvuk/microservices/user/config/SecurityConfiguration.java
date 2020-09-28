@@ -1,32 +1,68 @@
 package com.dejanvuk.microservices.user.config;
 
+import com.dejanvuk.microservices.user.config.oauth2.CustomServerAuthorizationRequestRepository;
+import com.dejanvuk.microservices.user.config.oauth2.OAuth2ProviderFactory;
+import com.dejanvuk.microservices.user.config.oauth2.OAuth2UserAttributes;
+import com.dejanvuk.microservices.user.persistence.RoleRepository;
+import com.dejanvuk.microservices.user.persistence.RoleType;
+import com.dejanvuk.microservices.user.persistence.UserEntity;
+import com.dejanvuk.microservices.user.persistence.UserRepository;
 import com.dejanvuk.microservices.user.services.CustomReactiveUserDetailsService;
+import com.dejanvuk.microservices.user.utility.CookieUtility;
 import com.dejanvuk.microservices.user.utility.JwtTokenUtility;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.autoconfigure.security.oauth2.client.OAuth2ClientProperties;
 import org.springframework.context.annotation.Bean;
+import org.springframework.http.HttpCookie;
 import org.springframework.http.HttpMethod;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.codec.json.AbstractJackson2Decoder;
 import org.springframework.http.codec.json.Jackson2JsonDecoder;
+import org.springframework.http.server.reactive.ServerHttpRequest;
+import org.springframework.http.server.reactive.ServerHttpResponse;
 import org.springframework.security.authentication.ReactiveAuthenticationManager;
 import org.springframework.security.authentication.UserDetailsRepositoryReactiveAuthenticationManager;
 import org.springframework.security.config.annotation.method.configuration.EnableReactiveMethodSecurity;
 import org.springframework.security.config.annotation.web.reactive.EnableWebFluxSecurity;
 import org.springframework.security.config.web.server.SecurityWebFiltersOrder;
 import org.springframework.security.config.web.server.ServerHttpSecurity;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.factory.PasswordEncoderFactories;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken;
+import org.springframework.security.oauth2.client.registration.ClientRegistration;
+import org.springframework.security.oauth2.client.registration.InMemoryReactiveClientRegistrationRepository;
+import org.springframework.security.oauth2.client.registration.ReactiveClientRegistrationRepository;
+import org.springframework.security.oauth2.core.AuthorizationGrantType;
+import org.springframework.security.oauth2.core.user.DefaultOAuth2User;
 import org.springframework.security.web.server.SecurityWebFilterChain;
+import org.springframework.security.web.server.WebFilterExchange;
 import org.springframework.security.web.server.authentication.AuthenticationWebFilter;
+import org.springframework.security.web.server.authentication.RedirectServerAuthenticationSuccessHandler;
 import org.springframework.security.web.server.authorization.AuthorizationWebFilter;
 import org.springframework.security.web.server.context.NoOpServerSecurityContextRepository;
 import org.springframework.security.web.server.util.matcher.ServerWebExchangeMatchers;
+import org.springframework.util.MultiValueMap;
+import org.springframework.web.util.UriComponentsBuilder;
 import reactor.core.publisher.Mono;
+
+import java.io.UnsupportedEncodingException;
+import java.net.URI;
+import java.net.URLEncoder;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
 
 @EnableWebFluxSecurity
 @EnableReactiveMethodSecurity
 public class SecurityConfiguration {
+
+    private static final Logger log = LoggerFactory.getLogger(SecurityConfiguration.class);
 
     @Value("${app.AUTH_SIGNIN_URL}")
     private String authSigninUrl;
@@ -51,6 +87,10 @@ public class SecurityConfiguration {
 
     @Autowired
     JwtAuthorizationFilter jwtAuthorizationFilter;
+
+    // OAUTH2 OPENID
+    @Autowired
+    CustomServerAuthorizationRequestRepository customServerAuthorizationRequestRepository;
 
     @Bean
     AbstractJackson2Decoder jacksonDecoder() {
@@ -88,7 +128,8 @@ public class SecurityConfiguration {
         // set success and failure handlers
         filter.setAuthenticationSuccessHandler((webFilterExchange, authentication) -> {
             //Set the value of the #AUTHORIZATION header to the given Bearer token.
-            webFilterExchange.getExchange().getResponse().getHeaders().setBearerAuth(jwtTokenUtility.generateToken(authentication));
+            CustomUserDetails user = (CustomUserDetails) authentication.getPrincipal();
+            webFilterExchange.getExchange().getResponse().getHeaders().setBearerAuth(jwtTokenUtility.generateToken(user.getUsername()));
             return Mono.empty();
         });
 
@@ -96,19 +137,108 @@ public class SecurityConfiguration {
         return filter;
     }
 
-    /*
-    @Autowired
-    HttpCookieOAuth2AuthorizationRequestRepository httpCookieOAuth2AuthorizationRequestRepository;
 
-    @Autowired
-    CustomOAuth2UserService customOAuth2UserService;
+    @Bean
+    RedirectServerAuthenticationSuccessHandler customRedirectServerAuthenticationSuccessHandler() {
+        RedirectServerAuthenticationSuccessHandler redirectServerAuthenticationSuccessHandler = new RedirectServerAuthenticationSuccessHandler(){
+            @Autowired
+            CookieUtility cookieUtility;
 
-    @Autowired
-    CustomOauth2AuthenticationSuccessHandler customOauth2AuthenticationSuccessHandler;
+            public static final String REDIRECT_COOKIE = "redirect_uri";
+            public static final String OAUTH2_AUTHORIZATION_COOKIE = "oauth2_authorization_cookie";
 
-    @Autowired
-    CustomOauth2AuthenticationFailHandler customOauth2AuthenticationFailHandler;
-    */
+            @Value("${jwt.TOKEN_PREFIX}")
+            private String TOKEN_PREFIX;
+
+            @Autowired
+            private JwtTokenUtility jwtTokenUtility;
+
+            @Autowired
+            UserRepository userRepository;
+
+            @Autowired
+            RoleRepository roleRepository;
+
+
+
+            public Mono<Void> onAuthenticationSuccess(WebFilterExchange webFilterExchange, Authentication authentication) {
+                if (authentication instanceof OAuth2AuthenticationToken) {
+                    ServerHttpRequest request = webFilterExchange.getExchange().getRequest();
+                    MultiValueMap<String, HttpCookie> cookieMap = request.getCookies();
+
+
+                    String redirectUri = cookieUtility.getCookieValue(cookieMap, REDIRECT_COOKIE);
+
+                    log.info("redirectURi {}", redirectUri);
+
+
+                    ServerHttpResponse response = webFilterExchange.getExchange().getResponse();
+
+                    if (response.isCommitted()) {
+                        return Mono.empty();
+                    }
+
+                    // save the oauth2 user in database
+                    DefaultOAuth2User defaultOAuth2User = (DefaultOAuth2User) authentication.getPrincipal();
+
+                    Map<String, Object> userAttributes = defaultOAuth2User.getAttributes();
+
+                    return userRepository.existsByEmail((String)userAttributes.get("email")).flatMap(exists -> {
+                        OAuth2UserAttributes oAuth2UserAttributes = OAuth2ProviderFactory.getOAuth2UserAttributesByProvider((OAuth2AuthenticationToken) authentication, userAttributes);
+
+                        String jwt = TOKEN_PREFIX + " " + jwtTokenUtility.generateToken(oAuth2UserAttributes.getEmail());
+
+                        String location = null;
+                        try {
+                            location = UriComponentsBuilder.fromUriString(redirectUri).queryParam("jwt", URLEncoder.encode(jwt, "UTF-8")).build().toUriString();
+                        } catch (UnsupportedEncodingException e) {
+                            e.printStackTrace();
+                        }
+
+                        // clear authentication attributes and cookies are no longer needed
+                        cookieUtility.deleteCookie(response, cookieMap, REDIRECT_COOKIE);
+                        cookieUtility.deleteCookie(response, cookieMap, OAUTH2_AUTHORIZATION_COOKIE);
+
+                        response.setStatusCode(HttpStatus.PERMANENT_REDIRECT);
+                        response.getHeaders().setLocation(URI.create(location));
+
+                        log.info("location {}", location);
+
+                        if(!exists) {
+                            log.info("user doesnt exist, creating him!");
+                            // Register the new user
+                            UserEntity userEntity = new UserEntity();
+                            userEntity.setName(oAuth2UserAttributes.getName());
+                            // use email but make the user input the username
+                            userEntity.setUsername(oAuth2UserAttributes.getEmail());
+                            userEntity.setEmail(oAuth2UserAttributes.getEmail());
+                            userEntity.setImageUrl(oAuth2UserAttributes.getPictureUrl());
+                            userEntity.setProviderType(((OAuth2AuthenticationToken) authentication).getAuthorizedClientRegistrationId());
+
+                            userEntity.setToken(null);
+                            userEntity.setVerified(true);
+
+                            return roleRepository.findByName(RoleType.ROLE_USER).flatMap(role -> {
+                                userEntity.setRoles(Collections.singleton(role));
+                                System.out.println(userEntity);
+                                return userRepository.save(userEntity).flatMap(user-> Mono.empty());
+                            });
+                        }
+                        else { // User already exists
+                            log.info("user exists!");
+                            return Mono.empty();
+                        }
+                    });
+
+                }
+                else return Mono.empty();
+            }
+
+        };
+
+        return redirectServerAuthenticationSuccessHandler;
+    }
+
 
     @Bean
     public SecurityWebFilterChain securityFilterChain(ServerHttpSecurity http, ReactiveAuthenticationManager authenticationManager) {
@@ -137,6 +267,10 @@ public class SecurityConfiguration {
                 .failureHandler(customOauth2AuthenticationFailHandler);
 
          */
+
+        http.oauth2Login()
+                .authorizationRequestRepository(customServerAuthorizationRequestRepository)
+                .authenticationSuccessHandler(customRedirectServerAuthenticationSuccessHandler());
 
         http.addFilterAfter(authenticationWebFilter(),SecurityWebFiltersOrder.AUTHENTICATION);
         http.addFilterBefore(jwtAuthorizationFilter, SecurityWebFiltersOrder.HTTP_BASIC);

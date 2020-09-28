@@ -7,3 +7,7 @@ curl -X POST 'http://localhost:8080/auth/sign-up' -H "Content-Type: application/
 }'
 
 
+http://localhost:8080/oauth2/authorization/facebook
+http://localhost:8080/oauth2/authorization/facebook?redirect_uri=http://localhost:3000
+
+

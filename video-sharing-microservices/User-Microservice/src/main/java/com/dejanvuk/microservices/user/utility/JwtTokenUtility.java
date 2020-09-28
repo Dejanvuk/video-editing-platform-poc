@@ -1,17 +1,13 @@
 package com.dejanvuk.microservices.user.utility;
 
 import com.dejanvuk.microservices.user.config.CustomUserDetails;
-import com.dejanvuk.microservices.user.config.JwtProperties;
-import com.dejanvuk.microservices.user.persistence.UserEntity;
 import com.dejanvuk.microservices.user.persistence.UserRepository;
-import com.dejanvuk.microservices.user.response.Status;
 import io.jsonwebtoken.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -40,11 +36,11 @@ public class JwtTokenUtility {
     @Autowired
     UserRepository userRepository;
 
-    public String generateToken(Authentication authentication) {
+    public String generateToken(String usernameOrEmail) {
         Date expireDate = new Date(new Date().getTime() + EXPIRATION_TIME);
-        CustomUserDetails user = (CustomUserDetails) authentication.getPrincipal();
+
         String token = Jwts.builder()
-                .setSubject(user.getUsername())
+                .setSubject(usernameOrEmail)
                 .setIssuedAt(new Date())
                 .setExpiration(expireDate)
                 .setAudience(TOKEN_AUDIENCE)
@@ -56,6 +52,7 @@ public class JwtTokenUtility {
 
     public String generateTokenByEmail(String email) {
         Date expireDate = new Date(new Date().getTime() + EXPIRATION_TIME);
+
         String token = Jwts.builder()
                 .setSubject(email)
                 .setIssuedAt(new Date())
