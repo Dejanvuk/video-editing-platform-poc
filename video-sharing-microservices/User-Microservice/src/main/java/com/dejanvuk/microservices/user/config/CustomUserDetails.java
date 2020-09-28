@@ -155,4 +155,8 @@ public class CustomUserDetails implements OAuth2User, UserDetails {
     public Map<String, Object> getAttributes() {
         return attributes;
     }
+
+    public static CustomUserDetails getInvalidUser() {
+        return new CustomUserDetails("", "", "" ,"", "", false, null, null);
+    }
 }

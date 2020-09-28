@@ -16,6 +16,8 @@ public interface IUserService {
 
     Flux<UserResponse> findByName(String name);
 
+    Mono<UserResponse> findByUsernameOrEmail(String name);
+
     Flux<UserResponse> findAll();
 
     //Mono<UserResponse> update(UserPayload e);

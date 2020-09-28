@@ -67,6 +67,11 @@ public class UserService implements IUserService{
     }
 
     @Override
+    public Mono<UserResponse> findByUsernameOrEmail(String name) {
+        return null;
+    }
+
+    @Override
     public Flux<UserResponse> findAll() {
         return null;
     }

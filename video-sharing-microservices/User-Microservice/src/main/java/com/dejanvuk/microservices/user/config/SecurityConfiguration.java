@@ -11,15 +11,18 @@ import com.dejanvuk.microservices.user.services.CustomReactiveUserDetailsService
 import com.dejanvuk.microservices.user.utility.CookieUtility;
 import com.dejanvuk.microservices.user.utility.JwtTokenUtility;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import net.minidev.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.security.oauth2.client.OAuth2ClientProperties;
 import org.springframework.context.annotation.Bean;
+import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.http.HttpCookie;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.http.codec.json.AbstractJackson2Decoder;
 import org.springframework.http.codec.json.Jackson2JsonDecoder;
 import org.springframework.http.server.reactive.ServerHttpRequest;
@@ -31,6 +34,7 @@ import org.springframework.security.config.annotation.web.reactive.EnableWebFlux
 import org.springframework.security.config.web.server.SecurityWebFiltersOrder;
 import org.springframework.security.config.web.server.ServerHttpSecurity;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.crypto.factory.PasswordEncoderFactories;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken;
@@ -39,20 +43,25 @@ import org.springframework.security.oauth2.client.registration.InMemoryReactiveC
 import org.springframework.security.oauth2.client.registration.ReactiveClientRegistrationRepository;
 import org.springframework.security.oauth2.core.AuthorizationGrantType;
 import org.springframework.security.oauth2.core.user.DefaultOAuth2User;
+import org.springframework.security.web.authentication.AuthenticationFailureHandler;
 import org.springframework.security.web.server.SecurityWebFilterChain;
 import org.springframework.security.web.server.WebFilterExchange;
 import org.springframework.security.web.server.authentication.AuthenticationWebFilter;
 import org.springframework.security.web.server.authentication.RedirectServerAuthenticationSuccessHandler;
+import org.springframework.security.web.server.authentication.ServerAuthenticationFailureHandler;
 import org.springframework.security.web.server.authorization.AuthorizationWebFilter;
 import org.springframework.security.web.server.context.NoOpServerSecurityContextRepository;
 import org.springframework.security.web.server.util.matcher.ServerWebExchangeMatchers;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.util.UriComponentsBuilder;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -125,7 +134,6 @@ public class SecurityConfiguration {
 
         filter.setSecurityContextRepository(sessionConfig);
 
-        // set success and failure handlers
         filter.setAuthenticationSuccessHandler((webFilterExchange, authentication) -> {
             //Set the value of the #AUTHORIZATION header to the given Bearer token.
             CustomUserDetails user = (CustomUserDetails) authentication.getPrincipal();
@@ -133,6 +141,25 @@ public class SecurityConfiguration {
             return Mono.empty();
         });
 
+        filter.setAuthenticationFailureHandler((webFilterExchange, ex) -> {
+            final Logger log = LoggerFactory.getLogger(ServerAuthenticationFailureHandler.class);
+
+            ServerHttpResponse response = webFilterExchange.getExchange().getResponse();
+
+            response.setStatusCode(HttpStatus.OK);
+
+            JSONObject obj = new JSONObject();
+            obj.put("status", HttpStatus.OK.toString());
+            obj.put("message", ex.getMessage());
+            obj.put("authenticated", "false");
+            //obj.put("exists: " , {check the instance of the exception});
+
+            log.info("AUTHENTICATION FAILED!! {}", obj);
+
+            DataBuffer bodyDataBuffer = response.bufferFactory().wrap(JSONObject.toJSONString(obj).getBytes(StandardCharsets.UTF_8));
+
+            return response.writeWith(Mono.just(bodyDataBuffer));
+        });
 
         return filter;
     }
