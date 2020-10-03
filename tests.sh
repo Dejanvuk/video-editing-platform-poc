@@ -16,4 +16,3 @@ curl -X GET -k http://localhost:8080/user/me -H "Content-Type: application/json"
 http://localhost:8080/oauth2/authorization/facebook
 http://localhost:8080/oauth2/authorization/facebook?redirect_uri=http://localhost:3000
 
-

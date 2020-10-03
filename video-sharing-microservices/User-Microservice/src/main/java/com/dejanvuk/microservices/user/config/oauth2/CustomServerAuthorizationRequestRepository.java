@@ -2,6 +2,7 @@ package com.dejanvuk.microservices.user.config.oauth2;
 
 import com.dejanvuk.microservices.user.utility.CookieUtility;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpCookie;
 import org.springframework.http.server.reactive.ServerHttpResponse;
 import org.springframework.security.oauth2.client.web.server.ServerAuthorizationRequestRepository;
@@ -17,12 +18,16 @@ import java.util.Base64;
 @Service
 public class CustomServerAuthorizationRequestRepository implements ServerAuthorizationRequestRepository<OAuth2AuthorizationRequest> {
 
-    public static final String OAUTH2_AUTHORIZATION_COOKIE = "oauth2_authorization_cookie";
-    public static final String REDIRECT_COOKIE = "redirect_uri";
+    @Value("${app.OAUTH2_AUTHORIZATION_COOKIE}")
+    private String OAUTH2_AUTHORIZATION_COOKIE;
+
+    @Value("${app.REDIRECT_COOKIE}")
+    private String REDIRECT_COOKIE;
+
     public static final int COOKIE_AGE = 120;
 
     @Autowired
-    CookieUtility cookieUtility;
+    private CookieUtility cookieUtility;
 
     @Override
     public Mono<OAuth2AuthorizationRequest> loadAuthorizationRequest(ServerWebExchange serverWebExchange) {

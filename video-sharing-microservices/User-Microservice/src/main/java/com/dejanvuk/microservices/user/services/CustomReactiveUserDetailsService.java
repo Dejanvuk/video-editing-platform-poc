@@ -3,6 +3,7 @@ package com.dejanvuk.microservices.user.services;
 import com.dejanvuk.microservices.user.config.CustomUserDetails;
 import com.dejanvuk.microservices.user.persistence.UserEntity;
 import com.dejanvuk.microservices.user.persistence.UserRepository;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -16,7 +17,6 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import static reactor.core.publisher.Mono.error;
-
 @Service
 public class CustomReactiveUserDetailsService implements ReactiveUserDetailsService {
     @Autowired

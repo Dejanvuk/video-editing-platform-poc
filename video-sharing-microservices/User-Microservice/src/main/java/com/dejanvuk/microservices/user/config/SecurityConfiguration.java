@@ -82,6 +82,12 @@ public class SecurityConfiguration {
     @Value("${jwt.TOKEN_PREFIX}")
     private String TOKEN_PREFIX;
 
+    @Value("${app.OAUTH2_AUTHORIZATION_COOKIE}")
+    private String OAUTH2_AUTHORIZATION_COOKIE;
+
+    @Value("${app.REDIRECT_COOKIE}")
+    private String REDIRECT_COOKIE;
+
     @Autowired
     private JwtTokenUtility jwtTokenUtility;
 
@@ -141,7 +147,14 @@ public class SecurityConfiguration {
             return Mono.empty();
         });
 
-        filter.setAuthenticationFailureHandler((webFilterExchange, ex) -> {
+        filter.setAuthenticationFailureHandler(customServerAuthenticationFailureHandler());
+
+        return filter;
+    }
+
+    @Bean
+    ServerAuthenticationFailureHandler customServerAuthenticationFailureHandler() {
+        ServerAuthenticationFailureHandler serverAuthenticationFailureHandler = (webFilterExchange, ex) -> {
             final Logger log = LoggerFactory.getLogger(ServerAuthenticationFailureHandler.class);
 
             ServerHttpResponse response = webFilterExchange.getExchange().getResponse();
@@ -159,9 +172,49 @@ public class SecurityConfiguration {
             DataBuffer bodyDataBuffer = response.bufferFactory().wrap(JSONObject.toJSONString(obj).getBytes(StandardCharsets.UTF_8));
 
             return response.writeWith(Mono.just(bodyDataBuffer));
-        });
+        };
 
-        return filter;
+        return serverAuthenticationFailureHandler;
+    }
+
+    @Bean
+    ServerAuthenticationFailureHandler customOauth2ServerAuthenticationFailureHandler() {
+        ServerAuthenticationFailureHandler serverAuthenticationFailureHandler = new ServerAuthenticationFailureHandler() {
+            @Autowired
+            CookieUtility cookieUtility;
+
+            @Override
+            public Mono<Void> onAuthenticationFailure(WebFilterExchange webFilterExchange, AuthenticationException ex) {
+                final Logger log = LoggerFactory.getLogger(ServerAuthenticationFailureHandler.class);
+
+                ServerHttpResponse response = webFilterExchange.getExchange().getResponse();
+
+                response.setStatusCode(HttpStatus.OK);
+
+                // redirect the user without a jwt
+                ServerHttpRequest request = webFilterExchange.getExchange().getRequest();
+                MultiValueMap<String, HttpCookie> cookieMap = request.getCookies();
+
+
+                String redirectUri = cookieUtility.getCookieValue(cookieMap, REDIRECT_COOKIE);
+
+                response.getHeaders().setLocation(URI.create(redirectUri));
+
+                JSONObject obj = new JSONObject();
+                obj.put("status", HttpStatus.OK.toString());
+                obj.put("message", ex.getMessage());
+                obj.put("authenticated", "false");
+                //obj.put("exists: " , {check the instance of the exception});
+
+                log.info("AUTHENTICATION FAILED!! {}", obj);
+
+                DataBuffer bodyDataBuffer = response.bufferFactory().wrap(JSONObject.toJSONString(obj).getBytes(StandardCharsets.UTF_8));
+
+                return response.writeWith(Mono.just(bodyDataBuffer));
+            }
+        };
+
+        return serverAuthenticationFailureHandler;
     }
 
 
@@ -170,9 +223,6 @@ public class SecurityConfiguration {
         RedirectServerAuthenticationSuccessHandler redirectServerAuthenticationSuccessHandler = new RedirectServerAuthenticationSuccessHandler(){
             @Autowired
             CookieUtility cookieUtility;
-
-            public static final String REDIRECT_COOKIE = "redirect_uri";
-            public static final String OAUTH2_AUTHORIZATION_COOKIE = "oauth2_authorization_cookie";
 
             @Value("${jwt.TOKEN_PREFIX}")
             private String TOKEN_PREFIX;
@@ -285,19 +335,20 @@ public class SecurityConfiguration {
                 .pathMatchers(HttpMethod.GET, "/api/user/verify-email").permitAll()
                 .pathMatchers(HttpMethod.GET, "/email-verification/**").permitAll()
                 .pathMatchers(HttpMethod.GET, "/api/user/reset-password/**").permitAll()
+                .pathMatchers(HttpMethod.GET, "/actuator/**").permitAll()
+                .pathMatchers("/v3/api-docs/**","/v2/api-docs/**",
+                        "/configuration/ui",
+                        "/swagger-resources/**",
+                        "/configuration/security",
+                        "/swagger-ui.html",
+                        "/swagger-ui/**",
+                        "/webjars/**").permitAll()
                 .anyExchange().authenticated();
-
-        /*
-        http.oauth2Login().authorizationEndpoint().baseUri("/oauth2/authorize").authorizationRequestRepository(httpCookieOAuth2AuthorizationRequestRepository).and()
-                .userInfoEndpoint().userService(customOAuth2UserService).and()
-                .successHandler(customOauth2AuthenticationSuccessHandler)
-                .failureHandler(customOauth2AuthenticationFailHandler);
-
-         */
 
         http.oauth2Login()
                 .authorizationRequestRepository(customServerAuthorizationRequestRepository)
-                .authenticationSuccessHandler(customRedirectServerAuthenticationSuccessHandler());
+                .authenticationSuccessHandler(customRedirectServerAuthenticationSuccessHandler())
+                .authenticationFailureHandler(customOauth2ServerAuthenticationFailureHandler());
 
         http.addFilterAfter(authenticationWebFilter(),SecurityWebFiltersOrder.AUTHENTICATION);
         http.addFilterBefore(jwtAuthorizationFilter, SecurityWebFiltersOrder.HTTP_BASIC);

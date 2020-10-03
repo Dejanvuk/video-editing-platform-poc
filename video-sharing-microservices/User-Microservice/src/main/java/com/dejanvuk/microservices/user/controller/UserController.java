@@ -7,16 +7,20 @@ import com.dejanvuk.microservices.user.persistence.UserEntity;
 import com.dejanvuk.microservices.user.response.UserResponse;
 import com.dejanvuk.microservices.user.services.UserService;
 import com.dejanvuk.microservices.user.utility.JwtTokenUtility;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.util.UriComponents;
 import org.springframework.web.util.UriComponentsBuilder;
 import reactor.core.publisher.Mono;
@@ -27,6 +31,7 @@ import java.util.Map;
 import java.util.Set;
 
 @RestController
+@Tag(name = "REST API for users")
 public class UserController {
     @Autowired
     UserService userService;
@@ -41,6 +46,10 @@ public class UserController {
     UserEntityMapper userEntityMapper;
 
 
+    @Operation(description = "Sign up with the given credentials")
+    @ApiResponses({@ApiResponse(responseCode = "200", description = "Succesfully signed up", content = @Content(schema = @Schema(hidden = true))),
+            @ApiResponse(responseCode = "400", description = "Missing or invalid request body"),
+            @ApiResponse(responseCode = "500", description = "Internal error")})
     @PostMapping(path = "${app.AUTH_SIGNUP_URL}", consumes = "application/json", produces = "application/json")
     Mono<?> registerUser(@RequestBody SignUpPayload signUpPayload, UriComponentsBuilder b) {
 
@@ -59,6 +68,10 @@ public class UserController {
     }
 
 
+    @Operation(description = "Get private details about the user", security = @SecurityRequirement(name = "BearerScheme", scopes = "USER"))
+    @ApiResponses({@ApiResponse(responseCode = "200", content = @Content(mediaType = "application/json", schema = @Schema(implementation = UserResponse.class))),
+            @ApiResponse(responseCode = "401", description = "Missing or invalid request body"),
+            @ApiResponse(responseCode = "401", description = "Access token is missing or invalid")})
     @GetMapping("/user/me")
     @PreAuthorize("hasRole('USER')")
     Mono<ResponseEntity<UserResponse>> getCurrentLoggedInUser(@AuthenticationPrincipal Mono<CustomUserDetails> currentUserMono) {
