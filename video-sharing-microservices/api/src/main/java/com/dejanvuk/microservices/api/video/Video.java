@@ -1,6 +1,5 @@
-package com.dejanvuk.microservices.videomicroservice.response;
+package com.dejanvuk.microservices.api.video;
 
-import com.dejanvuk.microservices.videomicroservice.persistence.Tag;
 import lombok.Data;
 
 import java.util.List;
@@ -10,8 +9,6 @@ public class Video {
     private String id;
 
     private String locationUrl;
-
-    private String ownerName;
 
     private String title;
 

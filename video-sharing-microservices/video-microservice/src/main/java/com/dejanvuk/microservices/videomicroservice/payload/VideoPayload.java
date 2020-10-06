@@ -1,6 +1,6 @@
 package com.dejanvuk.microservices.videomicroservice.payload;
 
-import com.dejanvuk.microservices.videomicroservice.persistence.Tag;
+import com.dejanvuk.microservices.api.video.Tag;
 import io.swagger.annotations.ApiModelProperty;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
@@ -17,19 +17,23 @@ public class VideoPayload {
     private String ownerId;
 
     @NotBlank
-    @ApiModelProperty(notes = "The location where the video is hosted", required = true, position = 1)
+    @ApiModelProperty(notes = "The name of the user who uploaded the video", required = true, position = 1)
+    private String ownersName;
+
+    @NotBlank
+    @ApiModelProperty(notes = "The location where the video is hosted", required = true, position = 2)
     private String locationUrl;
 
     @Size(max = 64)
     @NotBlank
-    @ApiModelProperty(notes = "Title of the video", required = true, position = 2)
+    @ApiModelProperty(notes = "Title of the video", required = true, position = 3)
     private String title;
 
     @Size(max = 256)
     @NotBlank
-    @ApiModelProperty(notes = "Short video description of the video contents", required = true, position = 3)
+    @ApiModelProperty(notes = "Short video description of the video contents", required = true, position =4)
     private String description;
 
-    @ApiModelProperty(notes = "A list of tags for the video", position = 4)
+    @ApiModelProperty(notes = "A list of tags for the video", position = 5)
     private List<Tag> tags;
 }

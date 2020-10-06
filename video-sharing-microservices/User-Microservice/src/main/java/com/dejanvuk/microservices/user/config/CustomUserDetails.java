@@ -157,6 +157,6 @@ public class CustomUserDetails implements OAuth2User, UserDetails {
     }
 
     public static CustomUserDetails getInvalidUser() {
-        return new CustomUserDetails("", "", "" ,"", "", false, null, null);
+        return new CustomUserDetails("", "", "", "", "", false, null, null);
     }
 }

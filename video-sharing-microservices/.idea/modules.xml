@@ -2,6 +2,9 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
+      <module fileurl="file://$PROJECT_DIR$/Comment-Microservice/Comment-Microservice.iml" filepath="$PROJECT_DIR$/Comment-Microservice/Comment-Microservice.iml" />
+      <module fileurl="file://$PROJECT_DIR$/api/api.iml" filepath="$PROJECT_DIR$/api/api.iml" />
+      <module fileurl="file://$PROJECT_DIR$/../api-core.iml" filepath="$PROJECT_DIR$/../api-core.iml" />
       <module fileurl="file://$PROJECT_DIR$/User-Microservice/user-microservice.iml" filepath="$PROJECT_DIR$/User-Microservice/user-microservice.iml" />
       <module fileurl="file://$PROJECT_DIR$/video-microservice/video-microservice.iml" filepath="$PROJECT_DIR$/video-microservice/video-microservice.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/video-sharing-microservices.iml" filepath="$PROJECT_DIR$/.idea/video-sharing-microservices.iml" />

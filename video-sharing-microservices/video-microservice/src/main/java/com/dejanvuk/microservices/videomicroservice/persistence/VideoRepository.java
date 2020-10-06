@@ -8,5 +8,7 @@ import reactor.core.publisher.Mono;
 @Repository
 public interface VideoRepository extends ReactiveMongoRepository<VideoEntity, String> {
     Flux<VideoEntity> findAllByOwnerId(String ownerId);
+
     Mono<Void> deleteById(String videoId);
+
 }

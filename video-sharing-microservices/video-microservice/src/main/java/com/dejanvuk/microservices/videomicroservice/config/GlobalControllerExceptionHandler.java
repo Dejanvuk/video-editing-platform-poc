@@ -1,11 +1,8 @@
 package com.dejanvuk.microservices.videomicroservice.config;
 
+import com.dejanvuk.microservices.api.exceptions.HttpError;
 import com.dejanvuk.microservices.videomicroservice.exceptions.InvalidVideoIdException;
 import com.dejanvuk.microservices.videomicroservice.exceptions.VideoNotFoundException;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.Getter;
-import lombok.ToString;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
@@ -36,11 +33,4 @@ public class GlobalControllerExceptionHandler {
         return new HttpError(httpStatus, ZonedDateTime.now(), ex.getMessage());
     }
 
-    @Data
-    @AllArgsConstructor
-    private class HttpError {
-        private HttpStatus httpStatus;
-        private ZonedDateTime timestamp;
-        private String message;
-    }
 }

@@ -44,7 +44,7 @@ public class JwtTokenUtility {
                 .setIssuedAt(new Date())
                 .setExpiration(expireDate)
                 .setAudience(TOKEN_AUDIENCE)
-                .setIssuer( TOKEN_ISSUER)
+                .setIssuer(TOKEN_ISSUER)
                 .signWith(SignatureAlgorithm.HS512, JWT_SECRET)
                 .compact();
         return token;
@@ -71,7 +71,7 @@ public class JwtTokenUtility {
             return userRepository.findByUsernameOrEmail(username, username).switchIfEmpty(Mono.error(new UsernameNotFoundException("Username or email dont exist! " + username)))
                     .flatMap(user -> {
                         Set<GrantedAuthority> roles = user.getRoles().stream().map(role -> new SimpleGrantedAuthority(role.getName().name())).collect(Collectors.toSet());
-                        CustomUserDetails currentUser = new CustomUserDetails(user.getId(),user.getName(),user.getUsername(),user.getEmail(),user.getPassword(),user.getVerified(), roles, null);
+                        CustomUserDetails currentUser = new CustomUserDetails(user.getId(), user.getName(), user.getUsername(), user.getEmail(), user.getPassword(), user.getVerified(), roles, null);
                         return Mono.just(new UsernamePasswordAuthenticationToken(currentUser, null, roles));
                     });
         } catch (ExpiredJwtException exception) {

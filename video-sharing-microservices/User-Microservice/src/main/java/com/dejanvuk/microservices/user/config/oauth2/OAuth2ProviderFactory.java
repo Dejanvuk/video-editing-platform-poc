@@ -9,7 +9,7 @@ public class OAuth2ProviderFactory {
     public static OAuth2UserAttributes getOAuth2UserAttributesByProvider(OAuth2AuthenticationToken oAuth2AuthenticationToken, Map<String, Object> userAttributes) {
         String registrationId = oAuth2AuthenticationToken.getAuthorizedClientRegistrationId();
         OAuth2UserAttributes oAuth2UserAttributes = null;
-        switch(registrationId) {
+        switch (registrationId) {
             case "google":
                 oAuth2UserAttributes = new GoogleOAuth2UserAttribute(userAttributes);
                 break;

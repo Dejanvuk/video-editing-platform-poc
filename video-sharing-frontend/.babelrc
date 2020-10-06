@@ -1,23 +1,26 @@
 {
-    "presets": [
-        [
-        "@babel/env",
-        {
-            "useBuiltIns": "entry",
-            "targets": {
-                "browsers": [
-                    "last 2 versions"
-                  ]
-            }
+  "presets": [
+    [
+      "@babel/env",
+      {
+        "useBuiltIns": "entry",
+        "targets": {
+          "browsers": [
+            "last 2 versions"
+          ]
         }
-        ],
-        "@babel/react",
-        "@babel/typescript",
+      }
     ],
-    "plugins": [
-        "@babel/proposal-class-properties",
-        ["@babel/transform-runtime", {
-            "regenerator": true
-          }]
+    "@babel/react",
+    "@babel/typescript"
+  ],
+  "plugins": [
+    "@babel/proposal-class-properties",
+    [
+      "@babel/transform-runtime",
+      {
+        "regenerator": true
+      }
     ]
-  }
+  ]
+}

@@ -16,7 +16,7 @@ public abstract class OAuth2UserAttributes {
     }
 
     public String getId() {
-        return Integer.toString((Integer)userAttributes.get("id"));
+        return Integer.toString((Integer) userAttributes.get("id"));
     }
 
     public String getName() {
@@ -30,6 +30,7 @@ public abstract class OAuth2UserAttributes {
     public abstract String getPictureUrl();
 
     public static void validateOAuth2UserAttributes(OAuth2UserAttributes oAuth2UserAttributes) {
-        if(oAuth2UserAttributes.getEmail() == null) throw new BadCredentialsException("Github Email is private,please add a public email or Sign up using a different provider!");
+        if (oAuth2UserAttributes.getEmail() == null)
+            throw new BadCredentialsException("Github Email is private,please add a public email or Sign up using a different provider!");
     }
 }

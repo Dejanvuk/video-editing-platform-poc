@@ -26,7 +26,6 @@ public class JwtAuthorizationFilter implements WebFilter {
     private JwtTokenUtility jwtTokenUtility;
 
 
-
     private static final Logger log = LoggerFactory.getLogger(JwtAuthorizationFilter.class);
 
     @Override
@@ -34,7 +33,7 @@ public class JwtAuthorizationFilter implements WebFilter {
         log.info("Request {} called", serverWebExchange.getRequest().getPath().value());
         String authorizationHeader = serverWebExchange.getRequest().getHeaders().getFirst(HttpHeaders.AUTHORIZATION);
 
-        if(StringUtils.isEmpty(authorizationHeader) || !(authorizationHeader.startsWith(TOKEN_PREFIX))) {
+        if (StringUtils.isEmpty(authorizationHeader) || !(authorizationHeader.startsWith(TOKEN_PREFIX))) {
             return webFilterChain.filter(serverWebExchange);
         }
 

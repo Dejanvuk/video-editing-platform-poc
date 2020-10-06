@@ -7,20 +7,74 @@ services:
     networks:
       - my-network
     ports:
-      - "8080:8080"
+      - "8080:80"
     environment:
       - SPRING_PROFILES_ACTIVE=docker-compose
     depends_on:
-      mongodb:
+      mongodb_users:
         condition: service_healthy
 
-  mongodb:
+  mongodb_users:
     image: mongo:3.6.9
     mem_limit: 350m
     networks:
       - my-network
     ports:
       - "27017:27017"
+    command: mongod --smallfiles
+    healthcheck:
+      test: "mongo --eval 'db.stats().ok'"
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  video:
+    build: video-sharing-microservices/video-microservice
+    mem_limit: 250m
+    networks:
+      - my-network
+    ports:
+      - "8081:80"
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker-compose
+    depends_on:
+      mongodb_videos:
+        condition: service_healthy
+
+  mongodb_videos:
+    image: mongo:3.6.9
+    mem_limit: 350m
+    networks:
+      - my-network
+    ports:
+      - "27018:27017"
+    command: mongod --smallfiles
+    healthcheck:
+      test: "mongo --eval 'db.stats().ok'"
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  comment:
+    build: video-sharing-microservices/Comment-Microservice
+    mem_limit: 250m
+    networks:
+      - my-network
+    ports:
+      - "8082:80"
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker-compose
+    depends_on:
+      mongodb_comments:
+        condition: service_healthy
+
+  mongodb_comments:
+    image: mongo:3.6.9
+    mem_limit: 350m
+    networks:
+      - my-network
+    ports:
+      - "27019:27017"
     command: mongod --smallfiles
     healthcheck:
       test: "mongo --eval 'db.stats().ok'"

@@ -24,9 +24,9 @@ public class CookieUtility {
 
     public void deleteCookie(ServerHttpResponse response, MultiValueMap<String, HttpCookie> cookieMap, String cookieName) {
         List<HttpCookie> cookies = cookieMap.get(cookieName);
-        for(HttpCookie cookie: cookies) {
+        for (HttpCookie cookie : cookies) {
             var currentCookieName = cookie.getName();
-            if(currentCookieName.equals(cookieName)) {
+            if (currentCookieName.equals(cookieName)) {
                 ResponseCookie.ResponseCookieBuilder rcb = ResponseCookie.from(currentCookieName, "");
                 rcb.path("/");
                 rcb.maxAge(0);

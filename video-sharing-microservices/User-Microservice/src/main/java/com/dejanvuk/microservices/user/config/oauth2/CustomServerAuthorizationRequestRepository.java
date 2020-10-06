@@ -33,30 +33,28 @@ public class CustomServerAuthorizationRequestRepository implements ServerAuthori
     public Mono<OAuth2AuthorizationRequest> loadAuthorizationRequest(ServerWebExchange serverWebExchange) {
         MultiValueMap<String, HttpCookie> cookieMap = serverWebExchange.getRequest().getCookies();
 
-        if(cookieMap != null) {
+        if (cookieMap != null) {
             String oauth2CookieValue = cookieUtility.getCookieValue(cookieMap, OAUTH2_AUTHORIZATION_COOKIE);
 
             return Mono.just(OAuth2AuthorizationRequest.class
                     .cast(SerializationUtils.deserialize(Base64.getUrlDecoder().decode(oauth2CookieValue))));
-        }
-        else {
+        } else {
             return Mono.empty();
         }
     }
 
     @Override
     public Mono<Void> saveAuthorizationRequest(OAuth2AuthorizationRequest oAuth2AuthorizationRequest, ServerWebExchange serverWebExchange) {
-        if(oAuth2AuthorizationRequest == null) {
+        if (oAuth2AuthorizationRequest == null) {
             MultiValueMap<String, HttpCookie> cookieMap = serverWebExchange.getRequest().getCookies();
 
-            if(cookieMap != null) {
+            if (cookieMap != null) {
                 ServerHttpResponse response = serverWebExchange.getResponse();
                 cookieUtility.deleteCookie(response, cookieMap, OAUTH2_AUTHORIZATION_COOKIE);
                 cookieUtility.deleteCookie(response, cookieMap, REDIRECT_COOKIE);
             }
             return Mono.empty();
-        }
-        else {
+        } else {
             ServerHttpResponse response = serverWebExchange.getResponse();
             cookieUtility.addCookie(response, OAUTH2_AUTHORIZATION_COOKIE, Base64.getUrlEncoder().encodeToString(SerializationUtils.serialize(oAuth2AuthorizationRequest)), "", COOKIE_AGE);
             cookieUtility.addCookie(response, REDIRECT_COOKIE, serverWebExchange.getRequest().getQueryParams().getFirst(REDIRECT_COOKIE), "", COOKIE_AGE);

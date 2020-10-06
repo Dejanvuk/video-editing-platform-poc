@@ -220,7 +220,7 @@ public class SecurityConfiguration {
 
     @Bean
     RedirectServerAuthenticationSuccessHandler customRedirectServerAuthenticationSuccessHandler() {
-        RedirectServerAuthenticationSuccessHandler redirectServerAuthenticationSuccessHandler = new RedirectServerAuthenticationSuccessHandler(){
+        RedirectServerAuthenticationSuccessHandler redirectServerAuthenticationSuccessHandler = new RedirectServerAuthenticationSuccessHandler() {
             @Autowired
             CookieUtility cookieUtility;
 
@@ -235,7 +235,6 @@ public class SecurityConfiguration {
 
             @Autowired
             RoleRepository roleRepository;
-
 
 
             public Mono<Void> onAuthenticationSuccess(WebFilterExchange webFilterExchange, Authentication authentication) {
@@ -260,7 +259,7 @@ public class SecurityConfiguration {
 
                     Map<String, Object> userAttributes = defaultOAuth2User.getAttributes();
 
-                    return userRepository.existsByEmail((String)userAttributes.get("email")).flatMap(exists -> {
+                    return userRepository.existsByEmail((String) userAttributes.get("email")).flatMap(exists -> {
                         OAuth2UserAttributes oAuth2UserAttributes = OAuth2ProviderFactory.getOAuth2UserAttributesByProvider((OAuth2AuthenticationToken) authentication, userAttributes);
 
                         String jwt = TOKEN_PREFIX + " " + jwtTokenUtility.generateToken(oAuth2UserAttributes.getEmail());
@@ -281,7 +280,7 @@ public class SecurityConfiguration {
 
                         log.info("location {}", location);
 
-                        if(!exists) {
+                        if (!exists) {
                             log.info("user doesnt exist, creating him!");
                             // Register the new user
                             UserEntity userEntity = new UserEntity();
@@ -298,17 +297,15 @@ public class SecurityConfiguration {
                             return roleRepository.findByName(RoleType.ROLE_USER).flatMap(role -> {
                                 userEntity.setRoles(Collections.singleton(role));
                                 System.out.println(userEntity);
-                                return userRepository.save(userEntity).flatMap(user-> Mono.empty());
+                                return userRepository.save(userEntity).flatMap(user -> Mono.empty());
                             });
-                        }
-                        else { // User already exists
+                        } else { // User already exists
                             log.info("user exists!");
                             return Mono.empty();
                         }
                     });
 
-                }
-                else return Mono.empty();
+                } else return Mono.empty();
             }
 
         };
@@ -336,7 +333,7 @@ public class SecurityConfiguration {
                 .pathMatchers(HttpMethod.GET, "/email-verification/**").permitAll()
                 .pathMatchers(HttpMethod.GET, "/api/user/reset-password/**").permitAll()
                 .pathMatchers(HttpMethod.GET, "/actuator/**").permitAll()
-                .pathMatchers("/v3/api-docs/**","/v2/api-docs/**",
+                .pathMatchers("/v3/api-docs/**", "/v2/api-docs/**",
                         "/configuration/ui",
                         "/swagger-resources/**",
                         "/configuration/security",
@@ -350,7 +347,7 @@ public class SecurityConfiguration {
                 .authenticationSuccessHandler(customRedirectServerAuthenticationSuccessHandler())
                 .authenticationFailureHandler(customOauth2ServerAuthenticationFailureHandler());
 
-        http.addFilterAfter(authenticationWebFilter(),SecurityWebFiltersOrder.AUTHENTICATION);
+        http.addFilterAfter(authenticationWebFilter(), SecurityWebFiltersOrder.AUTHENTICATION);
         http.addFilterBefore(jwtAuthorizationFilter, SecurityWebFiltersOrder.HTTP_BASIC);
 
         return http.build();

@@ -1,9 +1,9 @@
 package com.dejanvuk.microservices.videomicroservice.persistence;
 
+import com.dejanvuk.microservices.api.video.Tag;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.AccessLevel;
 import lombok.Data;
-import lombok.Getter;
 import lombok.Setter;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.Id;
@@ -16,7 +16,7 @@ import java.util.Date;
 import java.util.List;
 
 @Data
-@Document(collection="videos")
+@Document(collection = "videos")
 public class VideoEntity {
     @Setter(AccessLevel.NONE)
     @Id

@@ -1,4 +1,4 @@
-package com.dejanvuk.microservices.videomicroservice.persistence;
+package com.dejanvuk.microservices.api.video;
 
 import lombok.Data;
 

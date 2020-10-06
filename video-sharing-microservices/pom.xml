@@ -12,6 +12,8 @@
     <modules>
         <module>User-Microservice</module>
         <module>video-microservice</module>
+        <module>api</module>
+        <module>Comment-Microservice</module>
     </modules>
 
 </project>

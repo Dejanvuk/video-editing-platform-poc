@@ -1,1 +1,15 @@
+server:
+  application.name: video-microservice
+  port: 80
+  servlet:
+    context-path: /api/v1
 
+spring.data.mongodb:
+  host: localhost
+  port: 27017
+  database: videos-db
+
+---
+spring.profiles: docker-compose
+
+spring.data.mongodb.host: mongodb_videos

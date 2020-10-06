@@ -22,11 +22,30 @@
           <entry name="$MAVEN_REPOSITORY$/joda-time/joda-time/2.9/joda-time-2.9.jar" />
           <entry name="$MAVEN_REPOSITORY$/org/projectlombok/lombok/1.18.12/lombok-1.18.12.jar" />
         </processorPath>
-        <module name="user-microservice" />
         <module name="video-microservice" />
+        <module name="user-microservice" />
+        <module name="Comment-Microservice" />
+      </profile>
+      <profile name="Maven default annotation processors profile" enabled="true">
+        <sourceOutputDir name="target/generated-sources/annotations" />
+        <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
+        <outputRelativeToContentRoot value="true" />
+        <module name="api-core" />
+      </profile>
+      <profile name="Annotation profile for api" enabled="true">
+        <sourceOutputDir name="target/generated-sources/annotations" />
+        <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
+        <outputRelativeToContentRoot value="true" />
+        <processorPath useClasspath="false">
+          <entry name="$MAVEN_REPOSITORY$/org/projectlombok/lombok/1.18.12/lombok-1.18.12.jar" />
+        </processorPath>
+        <module name="api" />
       </profile>
     </annotationProcessing>
     <bytecodeTargetLevel>
+      <module name="api" target="11" />
+      <module name="api-core" target="1.5" />
+      <module name="Comment-Microservice" target="11" />
       <module name="user-microservice" target="11" />
       <module name="video-microservice" target="11" />
       <module name="video-sharing-microservices" target="1.5" />
@@ -34,6 +53,8 @@
   </component>
   <component name="JavacSettings">
     <option name="ADDITIONAL_OPTIONS_OVERRIDE">
+      <module name="Comment-Microservice" options="-parameters" />
+      <module name="api" options="-parameters" />
       <module name="user-microservice" options="-parameters" />
       <module name="video-microservice" options="-parameters" />
     </option>

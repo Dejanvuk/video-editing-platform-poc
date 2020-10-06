@@ -20,7 +20,7 @@ import java.util.Set;
 
 @Getter
 @Setter
-@Document(collection="users")
+@Document(collection = "users")
 public class UserEntity {
     @Setter(AccessLevel.NONE)
     @Id

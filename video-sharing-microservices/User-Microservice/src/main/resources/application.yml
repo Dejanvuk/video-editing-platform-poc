@@ -1,65 +1,63 @@
 server:
-    application.name: user-microservice
-    port: 7000
-    servlet:
-        context-path: /api/v1
+  application.name: user-microservice
+  port: 80
+  servlet:
+    context-path: /api/v1
 
 spring.data.mongodb:
-    host: localhost
-    port: 27017
-    database: users-db
+  host: localhost
+  port: 27017
+  database: users-db
 
 app:
-    AUTH_SIGNIN_URL: /auth/signin
-    AUTH_SIGNUP_URL: /auth/sign-up
-    RESPONSE_HEADER: Authorization
-    OAUTH2_AUTHORIZATION_COOKIE: oauth2_authorization_cookie
-    REDIRECT_COOKIE: redirect_uri
+  AUTH_SIGNIN_URL: /auth/signin
+  AUTH_SIGNUP_URL: /auth/sign-up
+  RESPONSE_HEADER: Authorization
+  OAUTH2_AUTHORIZATION_COOKIE: oauth2_authorization_cookie
+  REDIRECT_COOKIE: redirect_uri
 
 jwt:
-    JWT_SECRET:  c4GS/lhQPY+0k8S9WsDxRUI7ld2tK/BpeFJGRuoGvck4uQqAEa2Dd6LaFaPqnzzTAbB4F/XUbeagL7vGCPkXr8I2S+37HaBRD5+Oagil4artuSbjo/M9D1C3Uec7zxZneare1dcy/pL6qAJUbqn+n1rsWJ3
-    TOKEN_HEADER: Authorization
-    TOKEN_PREFIX: Bearer
-    TOKEN_TYPE: JWT
-    EXPIRATION_TIME: 64000000
-    TOKEN_ISSUER: user-microservice
-    TOKEN_AUDIENCE: users
+  JWT_SECRET:  c4GS/lhQPY+0k8S9WsDxRUI7ld2tK/BpeFJGRuoGvck4uQqAEa2Dd6LaFaPqnzzTAbB4F/XUbeagL7vGCPkXr8I2S+37HaBRD5+Oagil4artuSbjo/M9D1C3Uec7zxZneare1dcy/pL6qAJUbqn+n1rsWJ3
+  TOKEN_HEADER: Authorization
+  TOKEN_PREFIX: Bearer
+  TOKEN_TYPE: JWT
+  EXPIRATION_TIME: 64000000
+  TOKEN_ISSUER: user-microservice
+  TOKEN_AUDIENCE: users
 
 spring:
-    security:
-        oauth2:
-            client:
-                registration:
-                    facebook:
-                        clientId: 1605797062885242
-                        clientSecret: 4d4b01b2abe33281e4204153f96154db
-                        scope:
-                            - email
-                            - public_profile
-                provider:
-                    facebook:
-                        authorizationUri: https://www.facebook.com/v8.0/dialog/oauth
-                        tokenUri: https://graph.facebook.com/v8.0/oauth/access_token
-                        userInfoUri: https://graph.facebook.com/v8.0/me?fields=id,first_name,middle_name,last_name,name,email,verified,is_verified,picture.width(250).height(250)
+  security:
+    oauth2:
+      client:
+        registration:
+          facebook:
+            clientId: 1605797062885242
+            clientSecret: 4d4b01b2abe33281e4204153f96154db
+            scope:
+              - email
+              - public_profile
+        provider:
+          facebook:
+            authorizationUri: https://www.facebook.com/v8.0/dialog/oauth
+            tokenUri: https://graph.facebook.com/v8.0/oauth/access_token
+            userInfoUri: https://graph.facebook.com/v8.0/me?fields=id,first_name,middle_name,last_name,name,email,verified,is_verified,picture.width(250).height(250)
 
 api:
-    common:
-        version: 1.0.0
-        title: User Microservice
-        description: User Microservice description
-        termsOfServiceUrl: Terms of service url
-        license: License
-        licenseUrl: License url
+  common:
+    version: 1.0.0
+    title: User Microservice
+    description: User Microservice description
+    termsOfServiceUrl: Terms of service url
+    license: License
+    licenseUrl: License url
 
-        contact:
-            name: Dejan Vuk
-            url: my-website.com
-            email: my-email@yahoo.com
-    controllers: aaa
+    contact:
+      name: Dejan Vuk
+      url: my-website.com
+      email: my-email@yahoo.com
+  controllers: aaa
 
 ---
 spring.profiles: docker-compose
 
-server.port: 8080
-
-spring.data.mongodb.host: mongodb
+spring.data.mongodb.host: mongodb_users

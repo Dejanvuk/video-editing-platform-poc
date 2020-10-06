@@ -26,7 +26,7 @@ public class CustomServerAuthenticationConverter implements ServerAuthentication
     public Mono<Authentication> convert(ServerWebExchange serverWebExchange) {
         return getUsernameAndPassword(serverWebExchange)
                 .switchIfEmpty(Mono.error(new RuntimeException("Failed to cast LoginPayload!"))).
-                map(e -> new UsernamePasswordAuthenticationToken(e.getUsernameOrEmail(), e.getPassword()));
+                        map(e -> new UsernamePasswordAuthenticationToken(e.getUsernameOrEmail(), e.getPassword()));
     }
 
     private Mono<LoginPayload> getUsernameAndPassword(ServerWebExchange exchange) {

@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.RequestParam;
  * Authentication API specification for Swagger documentation and Code Generation.
  * Implemented by Spring Security.
  */
-@Tag(name="Authentication")
+@Tag(name = "Authentication")
 @RequestMapping(value = "/", produces = MediaType.APPLICATION_JSON_VALUE)
 public interface AuthApi {
     /**
