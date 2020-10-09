@@ -46,7 +46,7 @@ public class ICommentService implements CommentService {
     }
 
     @Override
-    public Flux<Comment> getOwnersComments(String ownerId) {
+    public Flux<Comment> getOwnerComments(String ownerId) {
         return commentRepository.findAllByOwnerId(ownerId).log().map(commentEntity -> commentMapper.commentEntityToComment(commentEntity));
     }
 
@@ -57,7 +57,7 @@ public class ICommentService implements CommentService {
 
     @Override
     public void deleteComment(String commentId) {
-        if (Integer.parseInt(commentId) < 1) throw new InvalidCommentIdException(commentId);
+        //if (Integer.parseInt(commentId) < 1) throw new InvalidCommentIdException(commentId);
 
         log.debug("Deleting comment with id: {} " , commentId);
 

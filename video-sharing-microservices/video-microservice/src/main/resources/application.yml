@@ -9,7 +9,18 @@ spring.data.mongodb:
   port: 27017
   database: videos-db
 
+spring.rabbitmq:
+  host: 127.0.0.1
+  port: 5672
+  username: guest
+  password: guest
+
+management.endpoint.health.show-details: "ALWAYS"
+management.endpoints.web.exposure.include: "*"
+
 ---
 spring.profiles: docker-compose
 
 spring.data.mongodb.host: mongodb_videos
+
+spring.rabbitmq.host: rabbitmq

@@ -7,7 +7,7 @@ import reactor.core.publisher.Flux;
 public interface CommentService {
     void create(CommentPayload commentPayload);
 
-    Flux<Comment> getOwnersComments(String ownerId);
+    Flux<Comment> getOwnerComments(String ownerId);
 
     Flux<Comment> getVideoComments(String videoId);
 

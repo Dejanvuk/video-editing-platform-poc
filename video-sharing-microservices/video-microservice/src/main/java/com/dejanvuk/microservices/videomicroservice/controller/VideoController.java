@@ -2,8 +2,8 @@ package com.dejanvuk.microservices.videomicroservice.controller;
 
 import com.dejanvuk.microservices.api.comment.Comment;
 import com.dejanvuk.microservices.api.video.Video;
-import com.dejanvuk.microservices.videomicroservice.payload.UpdateVideoPayload;
 import com.dejanvuk.microservices.videomicroservice.payload.VideoPayload;
+import com.dejanvuk.microservices.videomicroservice.services.IVideoService;
 import com.dejanvuk.microservices.videomicroservice.services.VideoService;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,12 +26,14 @@ import java.util.Set;
 @Tag(name = "REST API for videos")
 public class VideoController {
 
+    private VideoService videoService;
+
     @Autowired
-    VideoService videoService;
+    public VideoController(VideoService videoService) {
+        this.videoService = videoService;
+    }
 
-    private final String commentServiceUrl = "http://comments-service";
-
-    @PostMapping(path = "/videos", consumes = "application/json", produces = "application/json")
+    //@PostMapping(path = "/videos", consumes = "application/json", produces = "application/json")
     Mono<?> createVideo(@RequestBody VideoPayload videoPayload) {
         Mono<ResponseEntity<Map<String, String>>> errors = validateVideo(videoPayload);
 
@@ -42,19 +44,14 @@ public class VideoController {
         return Mono.just(new ResponseEntity<>("Video created successfully!", HttpStatus.CREATED));
     }
 
-    @DeleteMapping(value = "/videos/{videoId}", produces = "application/json")
+    //@DeleteMapping(value = "/videos/{videoId}", produces = "application/json")
     void deleteVideo(@PathVariable String videoId) {
         videoService.deleteVideo(videoId);
     }
 
-    @PutMapping(value = "/videos/{videoId}")
-    void updateVideo(@PathVariable String videoId, @RequestBody UpdateVideoPayload updateVideoPayload) {
-        videoService.updateVideo(videoId, updateVideoPayload);
-    }
-
-    @GetMapping(value = "/videos/user/{userId}", produces = "application/json")
-    Flux<Video> getUsersVideos(@PathVariable String userId) {
-        return videoService.getOwnerVideos(userId);
+    //@PutMapping(value = "/videos/{videoId}")
+    void updateVideo(@PathVariable String videoId, @RequestBody VideoPayload videoPayload) {
+        videoService.updateVideo(videoId, videoPayload);
     }
 
     @GetMapping(value = "/videos", produces = "application/json")
@@ -62,10 +59,14 @@ public class VideoController {
         return videoService.getVideos();
     }
 
-    @GetMapping(value = "/videos/{userId}/comments", produces = "application/json")
+    @GetMapping(value = "/videos/{userId}/users", produces = "application/json")
+    Flux<Video> getUsersVideos(@PathVariable String userId) {
+        return videoService.getOwnerVideos(userId);
+    }
+
+    @GetMapping(value = "/videos/{videoId}/comments", produces = "application/json")
     Flux<Comment> getVideosComments(@PathVariable String videoId) {
-        WebClient webClient = WebClient.create(commentServiceUrl);
-        return webClient.get().uri("/comments/video/" + videoId).retrieve().bodyToFlux(Comment.class).log().onErrorResume(error -> Flux.empty());
+        return videoService.getVideoComments(videoId);
     }
 
     private Mono<ResponseEntity<Map<String, String>>> validateVideo(VideoPayload videoPayload) {

@@ -6,6 +6,7 @@ import com.dejanvuk.microservices.api.video.Video;
 import com.dejanvuk.microservices.user.config.CustomUserDetails;
 import com.dejanvuk.microservices.user.mappers.UserEntityMapper;
 import com.dejanvuk.microservices.user.payload.SignUpPayload;
+import com.dejanvuk.microservices.user.response.UserCreatedResponse;
 import com.dejanvuk.microservices.user.services.UserService;
 import com.dejanvuk.microservices.user.utility.JwtTokenUtility;
 import io.swagger.v3.oas.annotations.Operation;
@@ -15,6 +16,8 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -47,29 +50,22 @@ public class UserController {
     @Autowired
     UserEntityMapper userEntityMapper;
 
-    private final String videoServiceUrl = "http://videos-service";
-
-    private final String commentServiceUrl = "http://comments-service";
-
-
     @Operation(description = "Sign up with the given credentials")
-    @ApiResponses({@ApiResponse(responseCode = "200", description = "Succesfully signed up", content = @Content(schema = @Schema(hidden = true))),
+    @ApiResponses({@ApiResponse(responseCode = "201", description = "Successfully signed up", content = @Content(schema = @Schema(hidden = true))),
             @ApiResponse(responseCode = "400", description = "Missing or invalid request body"),
             @ApiResponse(responseCode = "500", description = "Internal error")})
     @PostMapping(path = "${app.AUTH_SIGNUP_URL}", consumes = "application/json", produces = "application/json")
     Mono<?> registerUser(@RequestBody SignUpPayload signUpPayload, UriComponentsBuilder b) {
-
         Mono<ResponseEntity<Map<String, String>>> errors = validateSignUpResult(signUpPayload);
         if (errors != null) return errors;
+
         return userService.checkForDuplicates(signUpPayload).map(exists -> {
             if (exists) return new ResponseEntity<>("User already exists!", HttpStatus.UNPROCESSABLE_ENTITY);
-            else {
-                return userService.create(signUpPayload).map(user -> {
-                    // Send verification email
-                    //amazonSesService.sendVerificationEmail(user);
-                    return new ResponseEntity<>("User created succesfully!", HttpStatus.CREATED);
-                });
-            }
+            else return userService.create(signUpPayload).map(user -> {
+                // Send verification email
+                //amazonSesService.sendVerificationEmail(user);
+                return new ResponseEntity<>(new UserCreatedResponse("User created successfully!"), HttpStatus.CREATED);
+            });
         });
     }
 
@@ -123,13 +119,11 @@ public class UserController {
 
     @GetMapping(value = "/users/{userId}/videos", produces = "application/json")
     Flux<Video> getUsersVideos(@PathVariable String userId) {
-        WebClient webClient = WebClient.create(videoServiceUrl);
-        return webClient.get().uri("/videos/user/" + userId).retrieve().bodyToFlux(Video.class).log().onErrorResume(error -> Flux.empty());
+        return userService.getUsersVideos(userId);
     }
 
     @GetMapping(value = "/users/{userId}/comments", produces = "application/json")
     Flux<Comment> getUsersComments(@PathVariable String userId) {
-        WebClient webClient = WebClient.create(commentServiceUrl);
-        return webClient.get().uri("/comments/user/" + userId).retrieve().bodyToFlux(Comment.class).log().onErrorResume(error -> Flux.empty());
+        return userService.getUsersComments(userId);
     }
 }

@@ -95,9 +95,6 @@ public class SecurityConfiguration {
     private CustomReactiveUserDetailsService userDetailsService;
 
     @Autowired
-    private ObjectMapper mapper;
-
-    @Autowired
     private CustomServerAuthenticationConverter customServerAuthenticationConverter;
 
     @Autowired
@@ -329,6 +326,7 @@ public class SecurityConfiguration {
         http.authorizeExchange()
                 .pathMatchers("/", "/favicon.ico", "/**/*.png", "/**/*.gif", "/**/*.svg", "/**/*.jpg", "/**/*.html", "/**/*.css", "/**/*.js").permitAll()
                 .pathMatchers("/auth/**", "/oauth2/**").permitAll()
+                .pathMatchers("/users/**").permitAll()
                 .pathMatchers(HttpMethod.GET, "/api/user/verify-email").permitAll()
                 .pathMatchers(HttpMethod.GET, "/email-verification/**").permitAll()
                 .pathMatchers(HttpMethod.GET, "/api/user/reset-password/**").permitAll()

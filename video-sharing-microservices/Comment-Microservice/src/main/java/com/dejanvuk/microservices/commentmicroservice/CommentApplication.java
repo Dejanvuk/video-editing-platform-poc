@@ -12,12 +12,6 @@ import org.springframework.data.mongodb.repository.config.EnableReactiveMongoRep
 @SpringBootApplication
 @ComponentScan("com.dejanvuk.microservices")
 public class CommentApplication {
-
-	@Bean
-	public MongoClient mongoClient() {
-		return MongoClients.create();
-	}
-
 	public static void main(String[] args) {
 		SpringApplication.run(CommentApplication.class, args);
 	}

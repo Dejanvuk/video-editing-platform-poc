@@ -2,14 +2,8 @@ package com.dejanvuk.microservices.commentmicroservice.controllers;
 
 import com.dejanvuk.microservices.api.comment.Comment;
 import com.dejanvuk.microservices.commentmicroservice.payload.CommentPayload;
-import com.dejanvuk.microservices.commentmicroservice.payload.UpdateCommentPayload;
 import com.dejanvuk.microservices.commentmicroservice.services.ICommentService;
-import com.mongodb.reactivestreams.client.MongoClient;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.mongodb.core.ReactiveMongoTemplate;
-import org.springframework.data.mongodb.core.query.Criteria;
-import org.springframework.data.mongodb.core.query.Query;
-import org.springframework.data.mongodb.core.query.Update;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -29,7 +23,7 @@ public class CommentController {
     @Autowired
     ICommentService commentService;
 
-    @PostMapping(path = "/comments", consumes = "application/json", produces = "application/json")
+    //@PostMapping(path = "/comments", consumes = "application/json", produces = "application/json")
     Mono<?> createComment(@RequestBody CommentPayload commentPayload) {
         Mono<ResponseEntity<Map<String, String>>> errors = validateComment(commentPayload);
 
@@ -40,25 +34,25 @@ public class CommentController {
         return Mono.just(new ResponseEntity<>("Comment created successfully!", HttpStatus.CREATED));
     }
 
-    @DeleteMapping(value = "/comments/{commentId}", produces = "application/json")
+    //@DeleteMapping(value = "/comments/{commentId}", produces = "application/json")
     void deleteComment(@PathVariable String commentId) {
         commentService.deleteComment(commentId);
     }
 
     @GetMapping(value = "/comments/video/{videoId}", produces = "application/json")
-    Flux<Comment> getVideosComment(@PathVariable String videoId){
+    Flux<Comment> getVideoComment(@PathVariable String videoId){
         return commentService.getVideoComments(videoId);
     }
 
     @GetMapping(value = "/comments/user/{userId}", produces = "application/json")
-    Flux<Comment> getUsersComment(@PathVariable String userId){
-        return commentService.getOwnersComments(userId);
+    Flux<Comment> getUserComment(@PathVariable String userId){
+        return commentService.getOwnerComments(userId);
     }
 
-    @PutMapping(value = "/comments/{commentId}")
-    void updateComment(@PathVariable String commentId, @RequestBody UpdateCommentPayload updateCommentPayload){
+    //@PutMapping(value = "/comments/{commentId}")
+    void updateComment(@PathVariable String commentId, @RequestBody CommentPayload commentPayload){
 
-        commentService.updateComment(commentId, updateCommentPayload.getEditedContent());
+        commentService.updateComment(commentId, commentPayload.getContent());
     }
 
 

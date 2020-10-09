@@ -6,14 +6,19 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.data.mongo.AutoConfigureDataMongo;
 import org.springframework.boot.test.autoconfigure.data.mongo.DataMongoTest;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.dao.OptimisticLockingFailureException;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import reactor.test.StepVerifier;
 
+import static org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDOM_PORT;
+
 @ExtendWith(SpringExtension.class)
-@DataMongoTest(properties = {"spring.cloud.config.enabled=false"})
+@AutoConfigureDataMongo
+@SpringBootTest
 public class PersistenceTest {
     @Autowired
     CommentRepository repository;
@@ -21,7 +26,7 @@ public class PersistenceTest {
     CommentEntity savedEntity;
 
     @BeforeEach
-    public void setupDb() {
+    public void setup() {
         StepVerifier.create(repository.deleteAll()).verifyComplete();
 
         CommentEntity commentEntity = getRandomEntity();

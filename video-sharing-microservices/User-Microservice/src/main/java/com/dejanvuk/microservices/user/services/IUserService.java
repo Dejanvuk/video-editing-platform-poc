@@ -1,6 +1,8 @@
 package com.dejanvuk.microservices.user.services;
 
+import com.dejanvuk.microservices.api.comment.Comment;
 import com.dejanvuk.microservices.api.user.User;
+import com.dejanvuk.microservices.api.video.Video;
 import com.dejanvuk.microservices.user.payload.SignUpPayload;
 import com.dejanvuk.microservices.user.persistence.UserEntity;
 import reactor.core.publisher.Flux;
@@ -22,5 +24,9 @@ public interface IUserService {
     Mono<Void> delete(Long id);
 
     Mono<Boolean> checkForDuplicates(SignUpPayload signUpPayload);
+
+    Flux<Video> getUsersVideos(String userId);
+
+    Flux<Comment>getUsersComments(String userId);
 
 }

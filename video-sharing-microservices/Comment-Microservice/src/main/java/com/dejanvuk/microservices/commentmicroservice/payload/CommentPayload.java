@@ -13,9 +13,6 @@ public class CommentPayload {
     @NotBlank
     private String videoId;
 
-    @NotBlank
-    private String ownerName;
-
     @Size(max = 256)
     @NotBlank
     private String content;

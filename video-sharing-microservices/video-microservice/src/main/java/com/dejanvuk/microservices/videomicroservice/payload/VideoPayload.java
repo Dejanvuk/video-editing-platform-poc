@@ -17,10 +17,6 @@ public class VideoPayload {
     private String ownerId;
 
     @NotBlank
-    @ApiModelProperty(notes = "The name of the user who uploaded the video", required = true, position = 1)
-    private String ownersName;
-
-    @NotBlank
     @ApiModelProperty(notes = "The location where the video is hosted", required = true, position = 2)
     private String locationUrl;
 

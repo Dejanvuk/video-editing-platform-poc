@@ -1,14 +1,11 @@
 package com.dejanvuk.microservices.videomicroservice.services;
 
-import com.dejanvuk.microservices.videomicroservice.exceptions.InvalidVideoIdException;
-import com.dejanvuk.microservices.videomicroservice.exceptions.VideoNotFoundException;
+import com.dejanvuk.microservices.api.comment.Comment;
 import com.dejanvuk.microservices.videomicroservice.mappers.VideoMapper;
-import com.dejanvuk.microservices.videomicroservice.payload.UpdateVideoPayload;
 import com.dejanvuk.microservices.videomicroservice.payload.VideoPayload;
 import com.dejanvuk.microservices.videomicroservice.persistence.VideoEntity;
 import com.dejanvuk.microservices.videomicroservice.persistence.VideoRepository;
 import com.dejanvuk.microservices.api.video.Video;
-import com.dejanvuk.microservices.api.user.User;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,29 +15,35 @@ import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.data.mongodb.core.query.Update;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
-import org.springframework.web.util.UriComponentsBuilder;
 import reactor.core.publisher.Flux;
-import reactor.core.publisher.Mono;
-
-import java.net.URI;
 
 @Service
 public class VideoService implements IVideoService {
 
     private static final Logger log = LoggerFactory.getLogger(VideoService.class);
 
-    @Autowired
     VideoRepository videoRepository;
 
-    @Autowired
     ReactiveMongoTemplate reactiveMongoTemplate;
 
-    @Autowired
     VideoMapper videoMapper;
 
-    private final String userServiceUrl = "http://user-service";
+    @Autowired
+    public void setVideoRepository(VideoRepository videoRepository) {
+        this.videoRepository = videoRepository;
+    }
 
-    private WebClient webClient = WebClient.create(userServiceUrl);
+    @Autowired
+    public void setReactiveMongoTemplate(ReactiveMongoTemplate reactiveMongoTemplate) {
+        this.reactiveMongoTemplate = reactiveMongoTemplate;
+    }
+
+    @Autowired
+    public void setVideoMapper(VideoMapper videoMapper) {
+        this.videoMapper = videoMapper;
+    }
+
+    private final String commentServiceUrl = "http://comments-service";
 
     public VideoService() {
     }
@@ -61,7 +64,7 @@ public class VideoService implements IVideoService {
 
     @Override
     public Flux<Video> getOwnerVideos(String ownerId) {
-        if (Integer.parseInt(ownerId) < 1) throw new InvalidVideoIdException(ownerId);
+        //if (Integer.parseInt(ownerId) < 1) throw new InvalidVideoIdException(ownerId);
 
         return videoRepository.findAllByOwnerId(ownerId).log().log()
                 .map(videoEntity -> videoMapper.videoEntityToApi(videoEntity));
@@ -74,23 +77,29 @@ public class VideoService implements IVideoService {
 
     @Override
     public void deleteVideo(String videoId) {
-        if (Integer.parseInt(videoId) < 1) throw new InvalidVideoIdException(videoId);
+        //if (Integer.parseInt(videoId) < 1) throw new InvalidVideoIdException(videoId);
 
         videoRepository.deleteById(videoId).log().block();
     }
 
     @Override
-    public void updateVideo(String videoId, UpdateVideoPayload updateVideoPayload) {
+    public void updateVideo(String videoId, VideoPayload videoPayload) {
         Query query = new Query();
         query.addCriteria(Criteria.where("id").is(videoId));
         Update update = new Update();
-        if(!updateVideoPayload.getNewTitle().isEmpty())
-            update.set("title", updateVideoPayload.getNewTitle());
+        if(!videoPayload.getTitle().isEmpty())
+            update.set("title", videoPayload.getTitle());
 
-        if(!updateVideoPayload.getDescription().isEmpty())
-            update.set("description", updateVideoPayload.getDescription());
+        if(!videoPayload.getDescription().isEmpty())
+            update.set("description", videoPayload.getDescription());
 
         reactiveMongoTemplate.updateFirst(query, update, VideoEntity.class).log().block();
+    }
+
+    @Override
+    public Flux<Comment> getVideoComments(String videoId) {
+        WebClient webClient = WebClient.create(commentServiceUrl);
+        return webClient.get().uri("/comments/video/" + videoId).retrieve().bodyToFlux(Comment.class).log().onErrorResume(error -> Flux.empty());
     }
 
 }
