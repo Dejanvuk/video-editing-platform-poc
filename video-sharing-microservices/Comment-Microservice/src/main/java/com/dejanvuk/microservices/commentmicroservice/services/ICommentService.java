@@ -1,7 +1,6 @@
 package com.dejanvuk.microservices.commentmicroservice.services;
 
 import com.dejanvuk.microservices.api.comment.Comment;
-import com.dejanvuk.microservices.commentmicroservice.exceptions.InvalidCommentIdException;
 import com.dejanvuk.microservices.commentmicroservice.mappers.CommentMapper;
 import com.dejanvuk.microservices.commentmicroservice.payload.CommentPayload;
 import com.dejanvuk.microservices.commentmicroservice.persistence.CommentEntity;
@@ -57,7 +56,7 @@ public class ICommentService implements CommentService {
 
     @Override
     public void deleteComment(String commentId) {
-        //if (Integer.parseInt(commentId) < 1) throw new InvalidCommentIdException(commentId);
+        //if (Integer.parseInt(commentId) < 1) throw new InvalidInputException(commentId);
 
         log.debug("Deleting comment with id: {} " , commentId);
 

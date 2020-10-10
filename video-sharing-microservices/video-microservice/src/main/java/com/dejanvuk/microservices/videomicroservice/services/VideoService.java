@@ -64,8 +64,6 @@ public class VideoService implements IVideoService {
 
     @Override
     public Flux<Video> getOwnerVideos(String ownerId) {
-        //if (Integer.parseInt(ownerId) < 1) throw new InvalidVideoIdException(ownerId);
-
         return videoRepository.findAllByOwnerId(ownerId).log().log()
                 .map(videoEntity -> videoMapper.videoEntityToApi(videoEntity));
     }
@@ -77,8 +75,6 @@ public class VideoService implements IVideoService {
 
     @Override
     public void deleteVideo(String videoId) {
-        //if (Integer.parseInt(videoId) < 1) throw new InvalidVideoIdException(videoId);
-
         videoRepository.deleteById(videoId).log().block();
     }
 

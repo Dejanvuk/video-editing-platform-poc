@@ -18,7 +18,10 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.autoconfigure.web.reactive.AutoConfigureWebTestClient;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
 import org.springframework.test.web.reactive.server.WebTestClient;
+import org.springframework.util.Base64Utils;
 import org.springframework.web.reactive.function.client.*;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -30,7 +33,7 @@ import static org.springframework.http.HttpStatus.OK;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
 
 @AutoConfigureWebTestClient
-@SpringBootTest(webEnvironment=RANDOM_PORT, properties = {"spring.data.mongodb.port=0"})
+@SpringBootTest(webEnvironment = RANDOM_PORT, properties = {"spring.data.mongodb.port=0"})
 @ExtendWith(MockitoExtension.class)
 public class ServicesTests {
     @Autowired
@@ -51,7 +54,7 @@ public class ServicesTests {
         repository.deleteAll().block();
     }
 
-    ExchangeFilterFunction printlnFilter= (request, next) -> {
+    ExchangeFilterFunction printlnFilter = (request, next) -> {
         System.out.println("\n\n" + request.method().toString().toUpperCase() + ":\n\nURL:"
                 + request.url().toString() + ":\n\nHeaders:" + request.headers().toString() + "\n\nAttributes:"
                 + request.attributes() + "\n\n");
@@ -59,8 +62,7 @@ public class ServicesTests {
         return next.exchange(request);
     };
 
-
-    public void signUpTest(){
+    public void signUpTest() {
         SignUpPayload payload = new SignUpPayload();
         payload.setUsername("username");
         payload.setEmail("email@email.com");
@@ -74,16 +76,17 @@ public class ServicesTests {
                 .exchange()
                 .expectStatus().isEqualTo(CREATED)
                 .expectHeader().contentType(APPLICATION_JSON)
-                .expectBody().json("");
+                .expectBody().jsonPath("$.message").isEqualTo("User created successfully!");
 
         StepVerifier.create(repository.count()).expectNext(1l).verifyComplete();
     }
 
-
-    public void signInTest(){
+    public void signInAndGetUserDetailsTest() {
         LoginPayload payload = new LoginPayload();
         payload.setUsernameOrEmail("username");
         payload.setPassword("password");
+
+        String jwtToken = "";
 
         client.post()
                 .uri(signInUrl)
@@ -92,17 +95,45 @@ public class ServicesTests {
                 .exchange()
                 .expectStatus().isEqualTo(OK)
                 .expectHeader().contentType(APPLICATION_JSON)
-                .expectBody().json("");
+                .expectHeader().value(HttpHeaders.AUTHORIZATION, s -> {
+                    System.out.println(s);
+            client.get()
+                    .uri("/user/me")
+                    .header(HttpHeaders.AUTHORIZATION, s)
+                    .accept(APPLICATION_JSON)
+                    .exchange()
+                    .expectStatus().isEqualTo(OK)
+                    .expectHeader().contentType(APPLICATION_JSON)
+                    .expectBody()
+                    .jsonPath("$.name").isEqualTo("name name")
+                    .jsonPath("$.email").isEqualTo("email@email.com");
+        });
     }
 
+    @Test
+    public void SignUpSignInTest() {
+        signUpTest();
+        signInAndGetUserDetailsTest();
+    }
 
+    @Test
+    public void getUserDetailsUnauthorizedTest(){
+        client.get()
+                .uri("/user/me")
+                .headers(httpHeaders -> httpHeaders.setBearerAuth("faketoken"))
+                .accept(APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isEqualTo(HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+
+    @Test
     public void getUsersVideosTest() {
         UserService service = Mockito.mock(UserService.class);
 
 
     }
 
-
+    @Test
     public void getUsersCommentsTest() {
         UserService service = Mockito.mock(UserService.class);
 
@@ -120,11 +151,6 @@ public class ServicesTests {
                 .expectStatus().isEqualTo(OK)
                 .expectHeader().contentType(APPLICATION_JSON)
                 .expectBodyList(Video.class).hasSize(3);
-    }
-
-
-    public void getUserDetailsTest(){
-
     }
 
 }

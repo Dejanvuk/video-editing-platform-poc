@@ -13,6 +13,8 @@ app:
   RESPONSE_HEADER: Authorization
   OAUTH2_AUTHORIZATION_COOKIE: oauth2_authorization_cookie
   REDIRECT_COOKIE: redirect_uri
+  COMMENT_SERVICE_MAX_TIMEOUT: 2
+  VIDEO_SERVICE_MAX_TIMEOUT: 3
 
 jwt:
   JWT_SECRET:  c4GS/lhQPY+0k8S9WsDxRUI7ld2tK/BpeFJGRuoGvck4uQqAEa2Dd6LaFaPqnzzTAbB4F/XUbeagL7vGCPkXr8I2S+37HaBRD5+Oagil4artuSbjo/M9D1C3Uec7zxZneare1dcy/pL6qAJUbqn+n1rsWJ3
@@ -54,6 +56,25 @@ api:
       url: my-website.com
       email: my-email@yahoo.com
   controllers: aaa
+
+resilience4j.circuitbreaker:
+  backends:
+    user:
+      registerHealthIndicator: true
+      ringBufferSizeInClosedState: 5
+      failureRateThreshold: 100
+      waitDurationInOpenState: 10000
+      ringBufferSizeInHalfOpenState: 5
+      automaticTransitionFromOpenToHalfOpenEnabled: true
+
+resilience4j.retry:
+  backends:
+    user:
+      maxRetryAttempts: 3
+      waitDuration: 1000
+      retryExceptions:
+        - org.springframework.web.reactive.function.client.WebClientResponseException$InternalServerError
+
 
 ---
 spring.profiles: docker-compose

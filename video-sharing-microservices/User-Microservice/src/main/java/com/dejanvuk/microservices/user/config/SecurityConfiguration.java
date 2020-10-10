@@ -19,10 +19,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.security.oauth2.client.OAuth2ClientProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.core.io.buffer.DataBuffer;
-import org.springframework.http.HttpCookie;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
+import org.springframework.http.*;
 import org.springframework.http.codec.json.AbstractJackson2Decoder;
 import org.springframework.http.codec.json.Jackson2JsonDecoder;
 import org.springframework.http.server.reactive.ServerHttpRequest;
@@ -140,7 +137,10 @@ public class SecurityConfiguration {
         filter.setAuthenticationSuccessHandler((webFilterExchange, authentication) -> {
             //Set the value of the #AUTHORIZATION header to the given Bearer token.
             CustomUserDetails user = (CustomUserDetails) authentication.getPrincipal();
-            webFilterExchange.getExchange().getResponse().getHeaders().setBearerAuth(jwtTokenUtility.generateToken(user.getUsername()));
+
+            ServerHttpResponse response = webFilterExchange.getExchange().getResponse();
+            response.getHeaders().setBearerAuth(jwtTokenUtility.generateToken(user.getUsername()));
+            response.getHeaders().setContentType(MediaType.APPLICATION_JSON);
             return Mono.empty();
         });
 

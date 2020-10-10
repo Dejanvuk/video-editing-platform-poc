@@ -1,7 +1,7 @@
 package com.dejanvuk.microservices.commentmicroservice.config;
 
 import com.dejanvuk.microservices.api.exceptions.HttpError;
-import com.dejanvuk.microservices.commentmicroservice.exceptions.InvalidCommentIdException;
+import com.dejanvuk.microservices.api.exceptions.InvalidInputException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
@@ -16,8 +16,8 @@ public class GlobalControllerExceptionHandler {
     private static final Logger LOG = LoggerFactory.getLogger(GlobalControllerExceptionHandler.class);
 
     @ResponseStatus(HttpStatus.UNPROCESSABLE_ENTITY)
-    @ExceptionHandler(InvalidCommentIdException.class)
-    public HttpError handleInvalidCommentIdExceptions(Exception ex) {
+    @ExceptionHandler(InvalidInputException.class)
+    public HttpError handleInvalidInputExceptions(Exception ex) {
         return createHttpError(HttpStatus.UNPROCESSABLE_ENTITY, ex);
     }
 

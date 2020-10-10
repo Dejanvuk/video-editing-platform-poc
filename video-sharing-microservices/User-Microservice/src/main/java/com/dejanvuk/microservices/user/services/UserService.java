@@ -7,9 +7,12 @@ import com.dejanvuk.microservices.user.mappers.UserEntityMapper;
 import com.dejanvuk.microservices.user.payload.SignUpPayload;
 import com.dejanvuk.microservices.user.persistence.*;
 import com.dejanvuk.microservices.user.utility.JwtTokenUtility;
+import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
+import io.github.resilience4j.retry.annotation.Retry;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
@@ -18,6 +21,7 @@ import reactor.core.publisher.Mono;
 
 import static reactor.core.publisher.Mono.error;
 
+import java.time.Duration;
 import java.util.Collections;
 
 @Service
@@ -39,6 +43,12 @@ public class UserService implements IUserService {
 
     @Autowired
     UserEntityMapper userEntityMapper;
+
+    @Value("${app.COMMENT_SERVICE_MAX_TIMEOUT}")
+    int COMMENT_SERVICE_MAX_TIMEOUT;
+
+    @Value("${app.VIDEO_SERVICE_MAX_TIMEOUT}")
+    int VIDEO_SERVICE_MAX_TIMEOUT;
 
     private final String VIDEO_SERVICE_URL = "http://videos-service";
 
@@ -97,16 +107,22 @@ public class UserService implements IUserService {
         return userRepository.existsByUsernameOrEmail(signUpPayload.getUsername(), signUpPayload.getEmail());
     }
 
+    @Retry(name = "user")
+    @CircuitBreaker(name = "user")
     @Override
     public Flux<Video> getUsersVideos(String userId) {
         WebClient webClient = WebClient.create(VIDEO_SERVICE_URL);
-        return webClient.get().uri("/videos/user/" + userId).retrieve().bodyToFlux(Video.class).log().onErrorResume(error -> Flux.empty());
+        return webClient.get().uri("/videos/user/" + userId).retrieve()
+                .bodyToFlux(Video.class).log().timeout(Duration.ofSeconds(COMMENT_SERVICE_MAX_TIMEOUT));
     }
 
+    @Retry(name = "user")
+    @CircuitBreaker(name = "user")
     @Override
     public Flux<Comment> getUsersComments(String userId) {
         WebClient webClient = WebClient.create(COMMENT_SERVICE_URL);
-        return webClient.get().uri("/comments/user/" + userId).retrieve().bodyToFlux(Comment.class).log().onErrorResume(error -> Flux.empty());
+        return webClient.get().uri("/comments/user/" + userId).retrieve()
+                .bodyToFlux(Comment.class).log().timeout(Duration.ofSeconds(VIDEO_SERVICE_MAX_TIMEOUT));
     }
 
 
