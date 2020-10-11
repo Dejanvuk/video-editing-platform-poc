@@ -6,9 +6,12 @@ import com.dejanvuk.microservices.videomicroservice.payload.VideoPayload;
 import com.dejanvuk.microservices.videomicroservice.persistence.VideoEntity;
 import com.dejanvuk.microservices.videomicroservice.persistence.VideoRepository;
 import com.dejanvuk.microservices.api.video.Video;
+import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
+import io.github.resilience4j.retry.annotation.Retry;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.mongodb.core.ReactiveMongoTemplate;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
@@ -16,6 +19,8 @@ import org.springframework.data.mongodb.core.query.Update;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Flux;
+
+import java.time.Duration;
 
 @Service
 public class VideoService implements IVideoService {
@@ -27,6 +32,9 @@ public class VideoService implements IVideoService {
     ReactiveMongoTemplate reactiveMongoTemplate;
 
     VideoMapper videoMapper;
+
+    @Value("${app.COMMENT_SERVICE_MAX_TIMEOUT}")
+    int COMMENT_SERVICE_MAX_TIMEOUT;
 
     @Autowired
     public void setVideoRepository(VideoRepository videoRepository) {
@@ -92,10 +100,12 @@ public class VideoService implements IVideoService {
         reactiveMongoTemplate.updateFirst(query, update, VideoEntity.class).log().block();
     }
 
+    @Retry(name = "getVideoComments")
+    @CircuitBreaker(name = "getVideoComments")
     @Override
     public Flux<Comment> getVideoComments(String videoId) {
         WebClient webClient = WebClient.create(commentServiceUrl);
-        return webClient.get().uri("/comments/video/" + videoId).retrieve().bodyToFlux(Comment.class).log().onErrorResume(error -> Flux.empty());
+        return webClient.get().uri("/comments/video/" + videoId).retrieve().bodyToFlux(Comment.class).log().timeout(Duration.ofSeconds(COMMENT_SERVICE_MAX_TIMEOUT));
     }
 
 }

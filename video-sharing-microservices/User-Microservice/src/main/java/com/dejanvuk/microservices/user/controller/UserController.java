@@ -118,19 +118,19 @@ public class UserController {
 
     @GetMapping(value = "/users/{userId}/videos", produces = "application/json")
     Flux<Video> getUsersVideos(@PathVariable String userId) {
-        return userService.getUsersVideos(userId).onErrorReturn(CallNotPermittedException.class, getFallbackVideos());
+        return userService.getUsersVideos(userId).onErrorReturn(CallNotPermittedException.class, getFallbackVideos(userId));
     }
 
-    Video getFallbackVideos() {
+    Video getFallbackVideos(String userId) {
         return new Video(); // empty video
     }
 
     @GetMapping(value = "/users/{userId}/comments", produces = "application/json")
     Flux<Comment> getUsersComments(@PathVariable String userId) {
-        return userService.getUsersComments(userId).onErrorReturn(CallNotPermittedException.class, getFallbackComments());
+        return userService.getUsersComments(userId).onErrorReturn(CallNotPermittedException.class, getFallbackComments(userId));
     }
 
-    Comment getFallbackComments() {
+    Comment getFallbackComments(String userId) {
         return new Comment(); // empty comment
     }
 }

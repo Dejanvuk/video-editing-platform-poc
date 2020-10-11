@@ -5,6 +5,7 @@ import com.dejanvuk.microservices.api.video.Video;
 import com.dejanvuk.microservices.videomicroservice.payload.VideoPayload;
 import com.dejanvuk.microservices.videomicroservice.services.IVideoService;
 import com.dejanvuk.microservices.videomicroservice.services.VideoService;
+import io.github.resilience4j.circuitbreaker.CallNotPermittedException;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -66,7 +67,11 @@ public class VideoController {
 
     @GetMapping(value = "/videos/{videoId}/comments", produces = "application/json")
     Flux<Comment> getVideosComments(@PathVariable String videoId) {
-        return videoService.getVideoComments(videoId);
+        return videoService.getVideoComments(videoId).onErrorReturn(CallNotPermittedException.class, getFallbackComments(videoId));
+    }
+
+    Comment getFallbackComments(String videoId) {
+        return new Comment();
     }
 
     private Mono<ResponseEntity<Map<String, String>>> validateVideo(VideoPayload videoPayload) {

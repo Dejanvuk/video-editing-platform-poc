@@ -18,6 +18,28 @@ spring.rabbitmq:
 management.endpoint.health.show-details: "ALWAYS"
 management.endpoints.web.exposure.include: "*"
 
+app:
+  COMMENT_SERVICE_MAX_TIMEOUT: 2
+
+resilience4j.circuitbreaker:
+  backends:
+    user:
+      registerHealthIndicator: true
+      ringBufferSizeInClosedState: 5
+      failureRateThreshold: 100
+      waitDurationInOpenState: 10000
+      ringBufferSizeInHalfOpenState: 5
+      automaticTransitionFromOpenToHalfOpenEnabled: true
+
+resilience4j.retry:
+  backends:
+    user:
+      maxRetryAttempts: 3
+      waitDuration: 1000
+      retryExceptions:
+        - org.springframework.web.reactive.function.client.WebClientResponseException$InternalServerError
+
+
 ---
 spring.profiles: docker-compose
 
