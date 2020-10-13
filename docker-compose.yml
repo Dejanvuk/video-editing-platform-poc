@@ -10,6 +10,11 @@ services:
       - "8080:80"
     environment:
       - SPRING_PROFILES_ACTIVE=docker-compose
+      - SPRING_CONFIG_LOCATION=file:/resources-config/application.yml,file:/resources-config/user.yml
+      - SPRING_RABBITMQ_USERNAME=${RABBITMQ_USER}
+      - SPRING_RABBITMQ_PASSWORD=${RABBITMQ_PASSWORD}
+      - SPRING_DATA_MONGODB_USERNAME=${MONGODB_USER}
+      - SPRING_DATA_MONGODB_PASSWORD=${MONGODB_PASSWORD}
     depends_on:
       mongodb_users:
         condition: service_healthy
@@ -21,6 +26,9 @@ services:
       - my-network
     ports:
       - "27017:27017"
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME=${MONGODB_USER}
+      - MONGO_INITDB_ROOT_PASSWORD=${MONGODB_PASSWORD}
     command: mongod --smallfiles
     healthcheck:
       test: "mongo --eval 'db.stats().ok'"
@@ -37,6 +45,11 @@ services:
       - "8081:80"
     environment:
       - SPRING_PROFILES_ACTIVE=docker-compose
+      - SPRING_CONFIG_LOCATION=file:/resources-config/application.yml,file:/resources-config/video.yml
+      - SPRING_RABBITMQ_USERNAME=${RABBITMQ_USER}
+      - SPRING_RABBITMQ_PASSWORD=${RABBITMQ_PASSWORD}
+      - SPRING_DATA_MONGODB_USERNAME=${MONGODB_USER}
+      - SPRING_DATA_MONGODB_PASSWORD=${MONGODB_PASSWORD}
     depends_on:
       mongodb_videos:
         condition: service_healthy
@@ -50,6 +63,9 @@ services:
       - my-network
     ports:
       - "27018:27017"
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME=${MONGODB_USER}
+      - MONGO_INITDB_ROOT_PASSWORD=${MONGODB_PASSWORD}
     command: mongod --smallfiles
     healthcheck:
       test: "mongo --eval 'db.stats().ok'"
@@ -66,6 +82,11 @@ services:
       - "8082:80"
     environment:
       - SPRING_PROFILES_ACTIVE=docker-compose
+      - SPRING_CONFIG_LOCATION=file:/resources-config/application.yml,file:/resources-config/comment.yml
+      - SPRING_RABBITMQ_USERNAME=${RABBITMQ_USER}
+      - SPRING_RABBITMQ_PASSWORD=${RABBITMQ_PASSWORD}
+      - SPRING_DATA_MONGODB_USERNAME=${MONGODB_USER}
+      - SPRING_DATA_MONGODB_PASSWORD=${MONGODB_PASSWORD}
     depends_on:
       mongodb_comments:
         condition: service_healthy
@@ -79,6 +100,9 @@ services:
       - my-network
     ports:
       - "27019:27017"
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME=${MONGODB_USER}
+      - MONGO_INITDB_ROOT_PASSWORD=${MONGODB_PASSWORD}
     command: mongod --smallfiles
     healthcheck:
       test: "mongo --eval 'db.stats().ok'"
@@ -94,6 +118,9 @@ services:
     ports:
       - 5672:5672
       - 15672:15672
+    environment:
+      - RABBITMQ_DEFAULT_USER=${RABBITMQ_USER}
+      - RABBITMQ_DEFAULT_PASS=${RABBITMQ_PASSWORD}
     healthcheck:
       test: ["CMD", "rabbitmqctl", "status"]
       interval: 15s

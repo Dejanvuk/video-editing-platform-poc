@@ -1,0 +1,71 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: comment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: comment
+  template:
+    metadata:
+      labels:
+        app: comment
+    spec:
+      containers:
+      - name: comment-container
+        image: <INSERT-URL>
+        imagePullPolicy: Never
+        env:
+        - name: SPRING_PROFILES_ACTIVE
+          value: "docker-compose"
+        - name: SPRING_CONFIG_LOCATION
+          value: file:/resources-config/application.yml,file:/resources-config/comment.yml
+        envFrom:
+        - secretRef:
+            name: rabbitmq-credentials
+        - secretRef:
+            name: mongodb-credentials
+        ports:
+        - containerPort: 80
+        resources:
+          limits:
+            memory: 300Mi
+        livenessProbe:
+          httpGet:
+            scheme: HTTP
+            path: /actuator/info
+            port: 80
+          initialDelaySeconds: 10
+          periodSeconds: 10
+          timeoutSeconds: 2
+          failureThreshold: 20
+          successThreshold: 1
+        readinessProbe:
+          httpGet:
+            scheme: HTTP
+            path: /actuator/health
+            port: 80
+          initialDelaySeconds: 10
+          periodSeconds: 10
+          timeoutSeconds: 2
+          failureThreshold: 3
+          successThreshold: 1
+        volumeMounts:
+        - name: configmap-comment-volume
+          mountPath: /resources-config
+      volumes:
+      - name: configmap-comment-volume
+        configMap:
+          name: configmap-comment
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: comment
+spec:
+  selector:
+    app: comment
+  ports:
+  - port: 80
+    targetPort: 80

@@ -1,0 +1,5 @@
+resources:
+- comment.yml
+- user.yml
+- video.yml
+

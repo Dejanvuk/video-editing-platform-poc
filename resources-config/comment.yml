@@ -24,3 +24,6 @@ spring.profiles: docker-compose
 spring.data.mongodb.host: mongodb_comments
 
 spring.rabbitmq.host: rabbitmq
+
+---
+spring.profiles: prod

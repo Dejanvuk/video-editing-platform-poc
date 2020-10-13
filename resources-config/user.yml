@@ -80,3 +80,6 @@ resilience4j.retry:
 spring.profiles: docker-compose
 
 spring.data.mongodb.host: mongodb_users
+
+---
+spring.profiles: prod

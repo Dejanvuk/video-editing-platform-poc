@@ -1,0 +1,63 @@
+kind: StorageClass
+apiVersion: storage.k8s.io/v1
+metadata:
+  name: mongo-video
+provisioner: kubernetes.io/azure-file
+mountOptions:
+  - dir_mode=0777
+  - file_mode=0777
+  - uid=0
+  - gid=0
+  - mfsymlinks
+  - cache=strict
+parameters:
+  skuName: Standard_LRS
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: mongo-video
+spec:
+  accessModes:
+    - ReadWriteMany
+  storageClassName: mongo-video-sc
+  resources:
+    requests:
+      storage: 256Mi
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mongo-video
+spec:
+  selector:
+    matchLabels:
+      app: mongo-video-db
+  template:
+    metadata:
+      labels:
+        app: mongo-video-db
+    spec:
+      containers:
+        - name: mongo-container
+          image: mongo
+          ports:
+            - containerPort: 27017
+          volumeMounts:
+            - name: mongo-volume
+              mountPath: /data/db
+      volumes:
+        - name: mongo-volume
+          persistentVolumeClaim:
+            claimName: mongo-video
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: mongo-video
+spec:
+  selector: mongo-video-db
+    app: mongo
+  ports:
+    - port: 27017
+      targetPort: 27017
