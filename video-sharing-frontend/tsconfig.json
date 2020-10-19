@@ -4,7 +4,7 @@
     "jsx": "react",
     "lib": [
       "dom",
-      "ES2015"
+      "ES2020"
     ],
     "moduleResolution": "node",
     "noEmit": true,
@@ -12,21 +12,21 @@
     "resolveJsonModule": true,
     "strict": true,
     "sourceMap": true,
-    "target": "ES2015",
+    "target": "ES2020",
     "preserveConstEnums": true,
     "noImplicitAny": false,
     "removeComments": true,
-    "module": "ES2015",
+    "module": "ES2020",
     "outDir": "./build/"
   },
   "include": [
-    "**/src/**/*.ts",
-    "**/src/**/*.tsx",
-    "App.tsx"
+    "src/**/*.ts",
+    "src/**/*.tsx"
   ],
   "exclude": [
     "node_modules",
     "babel.config.js",
-    "prettier.config.js"
+    "prettier.config.js",
+    "webpack.config.js"
   ]
 }

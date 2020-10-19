@@ -1,0 +1,4 @@
+node_modules
+build
+prettier.config.js
+webpack.config.js

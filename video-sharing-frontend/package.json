@@ -42,14 +42,16 @@
     "@types/react-redux": "^7.1.9",
     "@types/react-router-dom": "^5.1.5",
     "@types/webpack-env": "^1.15.3",
-    "@typescript-eslint/eslint-plugin": "^4.1.1",
-    "@typescript-eslint/parser": "^4.1.1",
+    "@typescript-eslint/eslint-plugin": "4.1.1",
+    "@typescript-eslint/parser": "4.1.1",
     "babel-loader": "^8.1.0",
     "css-loader": "^4.3.0",
     "eslint": "^7.9.0",
-    "eslint-config-airbnb": "^18.2.0",
     "eslint-config-airbnb-typescript": "^10.0.0",
     "eslint-config-prettier": "^6.11.0",
+    "eslint-import-resolver-typescript": "^2.3.0",
+    "eslint-plugin-import": "^2.22.1",
+    "eslint-plugin-jsx-a11y": "^6.3.1",
     "eslint-plugin-prettier": "^3.1.4",
     "eslint-plugin-react": "^7.20.6",
     "eslint-plugin-react-hooks": "^4.1.2",
@@ -69,7 +71,9 @@
   "scripts": {
     "start": "webpack-dev-server --open --port 3000 --compress --mode development --host 0.0.0.0",
     "dev": "webpack --mode development --progress",
-    "build": "webpack --mode production --progress"
+    "build": "webpack --mode production --progress",
+    "lint": "npx eslint . --ext .js,.jsx,.ts,.tsx",
+    "lint-fix": "eslint . --ext .tsx,.ts --fix"
   },
   "browserslist": {
     "production": [

@@ -1,8 +1,9 @@
-import React, {FC} from 'react';
-import {Button} from '@material-ui/core';
+import React, { FC } from 'react';
+import { Button } from '@material-ui/core';
 
 const App: FC = () => {
-    return <Button color="primary">Video Share</Button>;
+  const title = 'Video Share';
+  return <Button color="primary">{title}</Button>;
 };
 
 export default App;
