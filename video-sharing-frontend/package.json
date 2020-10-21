@@ -18,14 +18,9 @@
   },
   "homepage": "https://github.com/Dejanvuk/video-sharing-platform-poc#readme",
   "dependencies": {
-    "@material-ui/core": "^4.11.0",
     "core-js": "^3.6.5",
     "react": "^16.13.1",
     "react-dom": "^16.13.1",
-    "react-redux": "^7.2.1",
-    "react-router-dom": "^5.2.0",
-    "redux": "^4.0.5",
-    "redux-persist": "^6.0.0",
     "regenerator-runtime": "^0.13.7"
   },
   "devDependencies": {
@@ -36,11 +31,7 @@
     "@babel/preset-env": "^7.11.5",
     "@babel/preset-react": "^7.10.4",
     "@babel/preset-typescript": "^7.10.4",
-    "@types/node": "^14.11.1",
-    "@types/query-string": "^6.3.0",
     "@types/react-dom": "^16.9.8",
-    "@types/react-redux": "^7.1.9",
-    "@types/react-router-dom": "^5.1.5",
     "@types/webpack-env": "^1.15.3",
     "@typescript-eslint/eslint-plugin": "4.1.1",
     "@typescript-eslint/parser": "4.1.1",
@@ -72,7 +63,8 @@
     "start": "webpack-dev-server --open --port 3000 --compress --mode development --host 0.0.0.0",
     "dev": "webpack --mode development --progress",
     "build": "webpack --mode production --progress",
-    "lint": "npx eslint . --ext .js,.jsx,.ts,.tsx",
+    "lint": "eslint './src/**/*.{ts,tsx}'",
+    "lint-all": "npx eslint . --ext .js,.jsx,.ts,.tsx",
     "lint-fix": "eslint . --ext .tsx,.ts --fix"
   },
   "browserslist": {
