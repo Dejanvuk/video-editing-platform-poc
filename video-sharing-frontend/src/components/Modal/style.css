@@ -9,14 +9,19 @@
   background-color: rgba(161, 161, 161, 0.719);
 }
 .modal-area {
-  text-align: center;
   position: absolute;
   left: 50%;
   top: 50%;
   transform: translate(-50%, -50%);
-  padding: 2.5em 1.5em 1.5em 1.5em;
+  padding: 0.5em 0.5em 0.5em 0.5em;
   background-color: rgb(38, 38, 38);
   box-shadow: 0 0 10px 3px rgba(0, 0, 0, 0.1);
   overflow-y: auto;
   -webkit-overflow-scrolling: touch;
+}
+
+#cancel-btn {
+  float: right;
+  display: block;
+  margin-bottom: 15px;
 }

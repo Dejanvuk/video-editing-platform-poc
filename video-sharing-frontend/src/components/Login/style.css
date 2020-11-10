@@ -1,3 +1,25 @@
 .login-form {
   clear: both;
+  width: 500px;
+}
+
+.login-labels {
+  margin-top: 5px;
+  margin-bottom: 5px;
+  margin-left: 5px;
+}
+
+.login-inputs {
+  margin-top: 5px;
+  margin-bottom: 5px;
+  margin-left: 5px;
+}
+
+.email-login,
+.password-login {
+}
+
+#login-submit-btn {
+  float: right;
+  clear: both;
 }

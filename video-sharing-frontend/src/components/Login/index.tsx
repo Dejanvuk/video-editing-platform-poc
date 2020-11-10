@@ -48,14 +48,24 @@ const LoginForm: FC = () => {
     <div className="login-form">
       <form onSubmit={handleSubmit}>
         <div className="email-login">
-          <label>Email:</label>
-          <input onChange={handleChange} type="text" name="email" />
+          <label className="login-labels">Email:</label>
+          <input
+            className="login-inputs"
+            onChange={handleChange}
+            type="text"
+            name="email"
+          />
         </div>
         <div className="password-login">
-          <label>Password:</label>
-          <input onChange={handleChange} type="text" name="password" />
+          <label className="login-inputs">Password:</label>
+          <input
+            className="login-labels"
+            onChange={handleChange}
+            type="text"
+            name="password"
+          />
         </div>
-        <input type="submit" value="Submit" />
+        <input id="login-submit-btn" type="submit" value="Submit" />
       </form>
     </div>
   );

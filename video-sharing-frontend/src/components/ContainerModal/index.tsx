@@ -1,5 +1,7 @@
 import React, { FC, useState, useRef } from 'react';
 
+import { MODALS } from '../common/enums/modals';
+
 // import { useKeyPress } from '../common/hooks';
 
 import Modal from '../Modal';
@@ -10,20 +12,20 @@ import './style.css';
  * The component which will engulf the whole screen once the modal shows up
  */
 const ContainerModal: FC = () => {
-  const [isModal, setIsModal] = useState(false);
+  const [modal, setModal] = useState(MODALS.none);
 
   const modalRef = useRef<HTMLDivElement>(null);
 
   // const escPressed = useKeyPress('Escape');
 
-  const showModal = (): void => {
-    setIsModal(true);
+  const showModal = (type: MODALS): void => {
+    setModal(type);
     // disable scroll lock
     document.querySelector('html')?.classList.toggle('scroll-lock');
   };
 
   const closeModal = (): void => {
-    setIsModal(false);
+    setModal(MODALS.none);
     // re-enable scroll lock
     document.querySelector('html')?.classList.toggle('scroll-lock');
   };
@@ -52,10 +54,18 @@ const ContainerModal: FC = () => {
               File
             </button>
             <div className="dropdown-content">
-              <button type="button" className="dropdown-item">
+              <button
+                type="button"
+                className="dropdown-item"
+                onClick={() => showModal(MODALS.new)}
+              >
                 New
               </button>
-              <button type="button" className="dropdown-item">
+              <button
+                type="button"
+                className="dropdown-item"
+                onClick={() => showModal(MODALS.import)}
+              >
                 Import
               </button>
               <button type="button" className="dropdown-item">
@@ -73,14 +83,15 @@ const ContainerModal: FC = () => {
           <button type="button">More</button>
         </span>
         <span className="bar-about">
-          <button type="button" onClick={showModal}>
+          <button type="button" onClick={() => showModal(MODALS.login)}>
             Login
           </button>
         </span>
       </div>
 
-      {isModal ? (
+      {modal !== MODALS.none ? (
         <Modal
+          type={modal}
           modalRef={modalRef}
           onClickModal={onClickModal}
           onKeyDown={onKeyDown}
