@@ -19,6 +19,7 @@
   "homepage": "https://github.com/Dejanvuk/video-sharing-platform-poc#readme",
   "dependencies": {
     "core-js": "^3.6.5",
+    "focus-trap-react": "^8.1.1",
     "react": "^16.13.1",
     "react-dom": "^16.13.1",
     "regenerator-runtime": "^0.13.7"

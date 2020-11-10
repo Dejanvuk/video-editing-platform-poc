@@ -1,0 +1,31 @@
+body {
+  background-color: rgb(29, 29, 29);
+  font-family: Arial, Helvetica, sans-serif;
+  font-size: 12px;
+  color: rgb(138, 138, 138);
+}
+
+.blr {
+  margin-top: 2px;
+}
+
+button {
+  outline: none;
+  color: rgb(138, 138, 138);
+  background-color: rgb(38, 38, 38);
+  text-align: center;
+  white-space: nowrap;
+  border: none;
+  text-align: center;
+  outline: none;
+}
+
+button:hover {
+  color: rgb(45, 140, 235);
+  background-color: rgb(53, 53, 53);
+}
+
+.scroll-lock {
+  overflow: hidden;
+  margin-right: 17px;
+}

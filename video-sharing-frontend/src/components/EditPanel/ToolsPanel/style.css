@@ -1,0 +1,13 @@
+.tools-panel {
+  float: left;
+  width: 9.9%;
+  height: 100%;
+  background-color: rgb(38, 38, 38);
+}
+
+.tools-btn {
+  display: block;
+  margin: 0 auto;
+  width: 25px;
+  height: 25px;
+}
