@@ -1,4 +1,4 @@
-import React, { FC } from 'react';
+import React, { FC, useEffect } from 'react';
 
 import TopBar from '../TopBar';
 
@@ -11,6 +11,12 @@ import Footer from '../Footer';
 import './style.css';
 
 const App: FC = () => {
+  useEffect(() => {
+    const windowUrl = window.location.search;
+    const params = new URLSearchParams(windowUrl);
+    console.log(params.get('jwt'));
+  }, []);
+
   return (
     <div id="main-app">
       <TopBar />

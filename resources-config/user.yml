@@ -83,3 +83,5 @@ spring.data.mongodb.host: mongodb_users
 
 ---
 spring.profiles: prod
+
+spring.data.mongodb.host: mongo-user

@@ -1,18 +1,16 @@
 .login-form {
   clear: both;
-  width: 500px;
-}
-
-.login-labels {
-  margin-top: 5px;
-  margin-bottom: 5px;
-  margin-left: 5px;
+  text-align: center;
 }
 
 .login-inputs {
-  margin-top: 5px;
-  margin-bottom: 5px;
-  margin-left: 5px;
+  display: inline-block;
+  margin-bottom: 20px;
+  width: 80%;
+  margin-bottom: 25px;
+  height: 40px;
+  border-radius: 5px;
+  outline: 0;
 }
 
 .email-login,
@@ -20,6 +18,52 @@
 }
 
 #login-submit-btn {
-  float: right;
-  clear: both;
+  background: #e74c3c;
+  border: none;
+  color: white;
+  font-size: 18px;
+  font-weight: 200;
+  cursor: pointer;
+  transition: box-shadow 0.4s ease;
+  width: 90px;
+  margin-bottom: 10px;
+}
+
+.btn-group {
+  margin-top: 20px;
+}
+
+.btnOauth2 {
+  display: block;
+  width: 100%;
+  border-radius: 5px;
+  border: thin solid #888;
+  box-shadow: 1px 1px 1px grey;
+  white-space: nowrap;
+}
+
+.or-seperator {
+  margin-top: 5px;
+  margin-bottom: 5px;
+  width: 100%;
+  border-top: 1px solid gray;
+}
+
+.btnOauth2:hover {
+  cursor: pointer;
+}
+
+#btnFacebook {
+  background-color: white;
+}
+
+#btnGoogle {
+  background-color: white;
+}
+
+#btnGithub {
+  background-color: white;
+}
+
+.hint-text {
 }

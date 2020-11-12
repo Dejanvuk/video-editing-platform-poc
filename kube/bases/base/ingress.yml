@@ -8,18 +8,17 @@ spec:
       - minikube.me
       secretName: tls-certificate
   rules:
-  - host: minikube.me
-    http:
+  - http:
       paths:
-      - path: /api/comment/v1
+      - path: /api/v1/comment/v1
         backend:
           serviceName: comment
           servicePort: 80
-      - path: /api/video/v1
+      - path: /api/v1/video
         backend:
           serviceName: video
           servicePort: 80        
-      - path: /api/user/v1
+      - path: /user
         backend:
           serviceName: user
           servicePort: 80

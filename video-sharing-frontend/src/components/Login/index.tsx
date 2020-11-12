@@ -1,6 +1,11 @@
 /* eslint-disable jsx-a11y/label-has-associated-control */
 import React, { FC, useState } from 'react';
 
+import {
+  AUTHORIZATION_LINK,
+  REDIRECT_URI,
+} from '../common/util/constants/oauth2';
+
 import './style.css';
 
 const LoginForm: FC = () => {
@@ -48,8 +53,8 @@ const LoginForm: FC = () => {
     <div className="login-form">
       <form onSubmit={handleSubmit}>
         <div className="email-login">
-          <label className="login-labels">Email:</label>
           <input
+            placeholder="Email"
             className="login-inputs"
             onChange={handleChange}
             type="text"
@@ -57,15 +62,53 @@ const LoginForm: FC = () => {
           />
         </div>
         <div className="password-login">
-          <label className="login-inputs">Password:</label>
           <input
-            className="login-labels"
+            placeholder="Password"
+            className="login-inputs"
             onChange={handleChange}
             type="text"
             name="password"
           />
         </div>
         <input id="login-submit-btn" type="submit" value="Submit" />
+
+        <hr className="or-seperator" />
+        <p className="hint-text">
+          Sign up with your social media account or email address
+        </p>
+
+        <div className="btn-group">
+          <button
+            type="button"
+            id="btnFacebook"
+            className="btnOauth2"
+            onClick={() => {
+              window.location.href = `${AUTHORIZATION_LINK}facebook?redirect_uri=${REDIRECT_URI}`;
+            }}
+          >
+            Facebook
+          </button>
+          <button
+            type="button"
+            id="btnGoogle"
+            className="btnOauth2"
+            onClick={() => {
+              window.location.href = `${AUTHORIZATION_LINK}google?redirect_uri=${REDIRECT_URI}`;
+            }}
+          >
+            Google
+          </button>
+          <button
+            type="button"
+            id="btnGithub"
+            className="btnOauth2"
+            onClick={() => {
+              window.location.href = `${AUTHORIZATION_LINK}github?redirect_uri=${REDIRECT_URI}`;
+            }}
+          >
+            Github
+          </button>
+        </div>
       </form>
     </div>
   );

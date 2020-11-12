@@ -14,11 +14,11 @@ spec:
     spec:
       containers:
       - name: video-container
-        image: <INSERT-URL>
+        image: acrekstest.azurecr.io/azure-video-microservice:v1
         imagePullPolicy: Never
         env:
         - name: SPRING_PROFILES_ACTIVE
-          value: "docker-compose"
+          value: "prod"
         - name: SPRING_CONFIG_LOCATION
           value: file:/resources-config/application.yml,file:/resources-config/video.yml
         envFrom:

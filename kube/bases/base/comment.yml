@@ -14,11 +14,11 @@ spec:
     spec:
       containers:
       - name: comment-container
-        image: <INSERT-URL>
-        imagePullPolicy: Never
+        image: acrekstest.azurecr.io/azure-comment-microservice:v1
+        imagePullPolicy: Always
         env:
         - name: SPRING_PROFILES_ACTIVE
-          value: "docker-compose"
+          value: "prod"
         - name: SPRING_CONFIG_LOCATION
           value: file:/resources-config/application.yml,file:/resources-config/comment.yml
         envFrom:
