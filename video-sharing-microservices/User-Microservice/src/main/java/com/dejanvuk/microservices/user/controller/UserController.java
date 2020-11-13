@@ -73,7 +73,7 @@ public class UserController {
     @ApiResponses({@ApiResponse(responseCode = "200", content = @Content(mediaType = "application/json", schema = @Schema(implementation = User.class))),
             @ApiResponse(responseCode = "401", description = "Missing or invalid request body"),
             @ApiResponse(responseCode = "401", description = "Access token is missing or invalid")})
-    @GetMapping("/user/me")
+    @GetMapping("/users/me")
     @PreAuthorize("hasRole('USER')")
     Mono<User> getCurrentLoggedInUser(@AuthenticationPrincipal Mono<CustomUserDetails> currentUserMono) {
         return currentUserMono.flatMap(currentUser -> userService.findById(currentUser.getId()));

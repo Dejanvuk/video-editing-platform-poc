@@ -51,7 +51,8 @@ public class VideoService implements IVideoService {
         this.videoMapper = videoMapper;
     }
 
-    private final String commentServiceUrl = "http://comments-service";
+    @Value("${app.COMMENT_SERVICE_URL}")
+    private String COMMENT_SERVICE_URL;
 
     public VideoService() {
     }
@@ -104,7 +105,7 @@ public class VideoService implements IVideoService {
     @CircuitBreaker(name = "getVideoComments")
     @Override
     public Flux<Comment> getVideoComments(String videoId) {
-        WebClient webClient = WebClient.create(commentServiceUrl);
+        WebClient webClient = WebClient.create(COMMENT_SERVICE_URL);
         return webClient.get().uri("/comments/video/" + videoId).retrieve().bodyToFlux(Comment.class).log().timeout(Duration.ofSeconds(COMMENT_SERVICE_MAX_TIMEOUT));
     }
 

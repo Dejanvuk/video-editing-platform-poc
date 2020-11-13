@@ -20,6 +20,7 @@ management.endpoints.web.exposure.include: "*"
 
 app:
   COMMENT_SERVICE_MAX_TIMEOUT: 2
+  COMMENT_SERVICE_URL: http://comments-service/api/v1
 
 resilience4j.circuitbreaker:
   backends:

@@ -2,6 +2,11 @@ apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   name: ingress-gateway
+  annotations:
+    kubernetes.io/ingress.class: nginx
+    nginx.ingress.kubernetes.io/ssl-redirect: "false"
+    nginx.ingress.kubernetes.io/use-regex: "true"
+    nginx.ingress.kubernetes.io/rewrite-target: /$1
 spec:
   tls:
     - hosts:
@@ -10,15 +15,19 @@ spec:
   rules:
   - http:
       paths:
-      - path: /api/v1/comment/v1
+      - path: /api/v1/comments/.*
         backend:
           serviceName: comment
           servicePort: 80
-      - path: /api/v1/video
+      - path: /api/v1/videos/.*
         backend:
           serviceName: video
           servicePort: 80        
-      - path: /user
+      - path: /api/v1/users/.*
+        backend:
+          serviceName: user
+          servicePort: 80
+      - path: /api/v1/auth/.*
         backend:
           serviceName: user
           servicePort: 80

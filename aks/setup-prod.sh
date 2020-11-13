@@ -1,26 +1,26 @@
 #!/usr/bin/env bash
 
-# Before executing this script use "az login" to login in Azure and then "az acr login --name <acrName>" to setup your docker config.json to acr, else it will fail
+# Before executing this script use "az login" to login in Azure else it will fail
 
-az group create --name <rgName> --location eastus
+# Print all commands and stop executing if one fails
 
-az acr create --resource-group myResourceGroup --name <acrName> --sku Basic
+set -ex
 
-docker tag video-sharing-platform_user acrekstest.azurecr.io/azure-user-microservice:v1
+: ${RG_NAME=myResourceGroup}
+: ${ACR_NAME=acrEksTest}
+: ${ACR_LOGIN_SERVER=acrekstest.azurecr.io}
 
-docker tag video-sharing-platform_comment acrekstest.azurecr.io/azure-comment-microservice:v1
+az group create --name $RG_NAME --location eastus
 
-docker tag video-sharing-platform_video acrekstest.azurecr.io/azure-video-microservice:v1
+az acr create --resource-group myResourceGroup --name $ACR_NAME --sku Basic
 
-docker push acrekstest.azurecr.io/azure-user-microservice:v1
-
-docker push acrekstest.azurecr.io/azure-comment-microservice:v1
-
-docker push acrekstest.azurecr.io/azure-video-microservice:v1
+# Create the Kubernetes cluster
 
 az aks create \
-    --resource-group <rgName> \
-    --name <aksName> \
+    --resource-group $RG_NAME \
+    --name ACR_NAME \
     --node-count 3 \
     --generate-ssh-keys \
-    --attach-acr <acrName>
+    --attach-acr $ACR_NAME
+
+set +ex

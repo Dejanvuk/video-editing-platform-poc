@@ -50,9 +50,11 @@ public class UserService implements IUserService {
     @Value("${app.VIDEO_SERVICE_MAX_TIMEOUT}")
     int VIDEO_SERVICE_MAX_TIMEOUT;
 
-    private final String VIDEO_SERVICE_URL = "http://videos-service";
+    @Value("${app. @Value(\"${app.COMMENT_SERVICE_MAX_TIMEOUT}\")}")
+    private String VIDEO_SERVICE_URL;
 
-    private final String COMMENT_SERVICE_URL = "http://comments-service";
+    @Value("${app.COMMENT_SERVICE_URL}")
+    private String COMMENT_SERVICE_URL;
 
     @Override
     public Mono<UserEntity> create(SignUpPayload signUpPayload) {

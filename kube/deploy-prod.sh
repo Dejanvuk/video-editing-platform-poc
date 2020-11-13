@@ -1,5 +1,10 @@
 #!/usr/bin/env bash
 
+# A helper script to create the Kubernetes resources
+
+# ACR_LOGIN_SERVER=$ACR_LOGIN_SERVER
+: ${ACR_LOGIN_SERVER=acrekstest.azurecr.io}
+
 # Print all commands and stop executing if one fails
 
 set -ex
@@ -28,6 +33,19 @@ kubectl create secret generic mongodb-credentials \
     --from-literal=SPRING_DATA_MONGODB_USERNAME=mongodb-user \
     --from-literal=SPRING_DATA_MONGODB_PASSWORD=mongodb-password \
     --save-config
+
+# Deploy a NGINX ingress controller in the AKS cluster (requires Helm 3+) if not present already
+
+helm repo add ingress-nginx https://kubernetes.github.io/ingress-nginx
+
+helm install nginx-ingress ingress-nginx/ingress-nginx \
+    --namespace namespace-myakscluster-prod \
+    --set controller.replicaCount=2 \
+    --set controller.nodeSelector."beta\.kubernetes\.io/os"=linux \
+    --set defaultBackend.nodeSelector."beta\.kubernetes\.io/os"=linux \
+    --set controller.admissionWebhooks.patch.nodeSelector."beta\.kubernetes\.io/os"=linux
+
+# Deploy all the resources
 
 kubectl apply -f overlays/prod
 
