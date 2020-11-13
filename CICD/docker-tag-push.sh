@@ -8,8 +8,6 @@
 
 # The tag for production will be the unique and the first letters of the git commit hash
 
-
-
 TAG=$(git log -1 --pretty=%h)
 
 docker tag video-sharing-platform_user $ACR_LOGIN_SERVER/azure-user-microservice:$TAG

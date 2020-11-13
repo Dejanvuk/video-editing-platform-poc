@@ -50,7 +50,7 @@ public class UserService implements IUserService {
     @Value("${app.VIDEO_SERVICE_MAX_TIMEOUT}")
     int VIDEO_SERVICE_MAX_TIMEOUT;
 
-    @Value("${app. @Value(\"${app.COMMENT_SERVICE_MAX_TIMEOUT}\")}")
+    @Value("${app.VIDEO_SERVICE_URL}")
     private String VIDEO_SERVICE_URL;
 
     @Value("${app.COMMENT_SERVICE_URL}")

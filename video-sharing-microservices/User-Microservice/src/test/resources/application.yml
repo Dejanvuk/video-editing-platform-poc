@@ -1,0 +1,51 @@
+app:
+  AUTH_SIGNIN_URL: /auth/signin
+  AUTH_SIGNUP_URL: /auth/sign-up
+  RESPONSE_HEADER: Authorization
+  OAUTH2_AUTHORIZATION_COOKIE: oauth2_authorization_cookie
+  REDIRECT_COOKIE: redirect_uri
+  COMMENT_SERVICE_MAX_TIMEOUT: 2
+  VIDEO_SERVICE_MAX_TIMEOUT: 3
+  COMMENT_SERVICE_URL: http://comments-service/api/v1
+  VIDEO_SERVICE_URL: http://videos-service/api/v1
+
+jwt:
+  JWT_SECRET:  abcdefgh
+  TOKEN_HEADER: Authorization
+  TOKEN_PREFIX: Bearer
+  TOKEN_TYPE: JWT
+  EXPIRATION_TIME: 64000000
+  TOKEN_ISSUER: user-microservice
+  TOKEN_AUDIENCE: users
+
+api:
+  common:
+    version:
+    title:
+    description:
+    termsOfServiceUrl: T
+    license:
+    licenseUrl:
+
+    contact:
+      name:
+      url:
+      email:
+  controllers:
+
+spring:
+  security:
+    oauth2:
+      client:
+        registration:
+          facebook:
+            clientId: 1234567891234567
+            clientSecret: 12345678912345671234567891234567
+            scope:
+              - email
+              - public_profile
+        provider:
+          facebook:
+            authorizationUri: https://www.facebook.com/v8.0/dialog/oauth
+            tokenUri: https://graph.facebook.com/v8.0/oauth/access_token
+            userInfoUri: https://graph.facebook.com/v8.0/me?fields=id,first_name,middle_name,last_name,name,email,verified,is_verified,picture.width(250).height(250)

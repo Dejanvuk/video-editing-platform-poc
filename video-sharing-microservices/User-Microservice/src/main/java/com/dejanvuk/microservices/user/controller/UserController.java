@@ -36,17 +36,21 @@ import java.util.Set;
 @RestController
 @Tag(name = "REST API for users")
 public class UserController {
-    @Autowired
     UserService userService;
 
-    @Autowired
     PasswordEncoder passwordEncoder;
 
-    @Autowired
     JwtTokenUtility jwtTokenUtility;
 
-    @Autowired
     UserEntityMapper userEntityMapper;
+
+    @Autowired
+    public UserController(UserService userService, PasswordEncoder passwordEncoder, JwtTokenUtility jwtTokenUtility, UserEntityMapper userEntityMapper) {
+        this.userService = userService;
+        this.passwordEncoder = passwordEncoder;
+        this.jwtTokenUtility = jwtTokenUtility;
+        this.userEntityMapper = userEntityMapper;
+    }
 
     @Operation(description = "Sign up with the given credentials")
     @ApiResponses({@ApiResponse(responseCode = "201", description = "Successfully signed up", content = @Content(schema = @Schema(hidden = true))),

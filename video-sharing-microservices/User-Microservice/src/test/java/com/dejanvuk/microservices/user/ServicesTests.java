@@ -4,10 +4,12 @@ package com.dejanvuk.microservices.user;
 import com.dejanvuk.microservices.api.comment.Comment;
 import com.dejanvuk.microservices.api.video.Video;
 import com.dejanvuk.microservices.user.controller.UserController;
+import com.dejanvuk.microservices.user.mappers.UserEntityMapper;
 import com.dejanvuk.microservices.user.payload.LoginPayload;
 import com.dejanvuk.microservices.user.payload.SignUpPayload;
 import com.dejanvuk.microservices.user.persistence.UserRepository;
 import com.dejanvuk.microservices.user.services.UserService;
+import com.dejanvuk.microservices.user.utility.JwtTokenUtility;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -18,8 +20,11 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.autoconfigure.web.reactive.AutoConfigureWebTestClient;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.context.annotation.PropertySource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.web.reactive.server.WebTestClient;
 import org.springframework.util.Base64Utils;
 import org.springframework.web.reactive.function.client.*;
@@ -41,6 +46,18 @@ public class ServicesTests {
 
     @Autowired
     UserRepository repository;
+
+    @Autowired
+    UserService userService;
+
+    @Autowired
+    PasswordEncoder passwordEncoder;
+
+    @Autowired
+    JwtTokenUtility jwtTokenUtility;
+
+    @Autowired
+    UserEntityMapper userEntityMapper;
 
     @Value("${app.AUTH_SIGNUP_URL}")
     private String signUpUrl;
@@ -98,7 +115,7 @@ public class ServicesTests {
                 .expectHeader().value(HttpHeaders.AUTHORIZATION, s -> {
                     System.out.println(s);
             client.get()
-                    .uri("/user/me")
+                    .uri("/users/me")
                     .header(HttpHeaders.AUTHORIZATION, s)
                     .accept(APPLICATION_JSON)
                     .exchange()
@@ -119,7 +136,7 @@ public class ServicesTests {
     @Test
     public void getUserDetailsUnauthorizedTest(){
         client.get()
-                .uri("/user/me")
+                .uri("/users/me")
                 .headers(httpHeaders -> httpHeaders.setBearerAuth("faketoken"))
                 .accept(APPLICATION_JSON)
                 .exchange()
@@ -133,6 +150,7 @@ public class ServicesTests {
 
     }
 
+    /*
     @Test
     public void getUsersCommentsTest() {
         UserService service = Mockito.mock(UserService.class);
@@ -144,7 +162,13 @@ public class ServicesTests {
         Flux<Comment> commentFlux = Flux.just(comment1, comment2, comment3);
         Mockito.when(service.getUsersComments(userId)).thenReturn(commentFlux);
 
-        client.get()
+        UserController userController = new UserController();
+
+        userController.setUserService(service);
+
+        WebTestClient mockedClient = WebTestClient.bindToController(userController).build();
+
+        mockedClient.get()
                 .uri("/users/" + userId + "/comments")
                 .accept(APPLICATION_JSON)
                 .exchange()
@@ -152,5 +176,7 @@ public class ServicesTests {
                 .expectHeader().contentType(APPLICATION_JSON)
                 .expectBodyList(Video.class).hasSize(3);
     }
+    */
+
 
 }
