@@ -2,4 +2,7 @@ resources:
 - comment.yml
 - user.yml
 - video.yml
-
+- ingress.yml
+- comment-mongo.yml
+- user-mongo.yml
+- video-mongo.yml

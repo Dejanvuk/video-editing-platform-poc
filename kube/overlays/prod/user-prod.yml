@@ -13,7 +13,7 @@ spec:
     spec:
       containers:
       - name: user
-        image: <INSERT-PROD-URL>
+        image: acrekstest.azurecr.io/azure-user-microservice:1df0c9c
         env:
         - name: SPRING_PROFILES_ACTIVE
           value: "prod"

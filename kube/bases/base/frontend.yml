@@ -1,31 +1,21 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: video
+  name: frontend
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: video
+      app: frontend
   template:
     metadata:
       labels:
-        app: video
+        app: frontend
     spec:
       containers:
-      - name: video-container
-        image: acrekstest.azurecr.io/azure-video-microservice:v1
+      - name: frontend-container
+        image: acrekstest.azurecr.io/azure-user-microservice:v1
         imagePullPolicy: Always
-        env:
-        - name: SPRING_PROFILES_ACTIVE
-          value: "prod"
-        - name: SPRING_CONFIG_LOCATION
-          value: file:/resources-config/application.yml,file:/resources-config/video.yml
-        envFrom:
-        - secretRef:
-            name: rabbitmq-credentials
-        - secretRef:
-            name: mongodb-credentials
         ports:
         - containerPort: 80
         resources:
@@ -34,7 +24,7 @@ spec:
         livenessProbe:
           httpGet:
             scheme: HTTP
-            path: /actuator/info
+            path: /
             port: 80
           initialDelaySeconds: 10
           periodSeconds: 10
@@ -44,28 +34,21 @@ spec:
         readinessProbe:
           httpGet:
             scheme: HTTP
-            path: /actuator/health
+            path: /
             port: 80
           initialDelaySeconds: 10
           periodSeconds: 10
           timeoutSeconds: 2
           failureThreshold: 3
           successThreshold: 1
-        volumeMounts:
-        - name: configmap-video-volume
-          mountPath: /resources-config
-      volumes:
-      - name: configmap-video-volume
-        configMap:
-          name: configmap-video
 ---
 apiVersion: v1
 kind: Service
 metadata:
-  name: video
+  name: frontend
 spec:
   selector:
-    app: video
+    app: frontend
   ports:
   - port: 80
     targetPort: 80

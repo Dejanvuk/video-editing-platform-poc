@@ -57,7 +57,7 @@ metadata:
   name: mongo-video
 spec:
   selector: mongo-video-db
-    app: mongo
+  app: mongo
   ports:
     - port: 27017
       targetPort: 27017

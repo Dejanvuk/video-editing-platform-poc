@@ -1,5 +1,5 @@
-kind: StorageClass
 apiVersion: storage.k8s.io/v1
+kind: StorageClass
 metadata:
   name: mongo-comment
 provisioner: kubernetes.io/azure-file
@@ -41,9 +41,9 @@ spec:
       containers:
         - name: mongo-container
           image: mongo
-        envFrom:
-        - secretRef:
-            name: mongodb-credentials
+          envFrom:
+          - secretRef:
+              name: mongodb-credentials
           ports:
             - containerPort: 27017
           volumeMounts:
@@ -60,7 +60,7 @@ metadata:
   name: mongo-comment
 spec:
   selector: mongo-comment-db
-    app: mongo
+  app: mongo
   ports:
     - port: 27017
       targetPort: 27017

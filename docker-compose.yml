@@ -1,6 +1,14 @@
 version: '2.1'
 
 services:
+  frontend:
+    build: video-sharing-frontend/
+    mem_limit: 350m
+    networks:
+      - my-network
+    ports:
+      - "8083:80"
+
   user:
     build: video-sharing-microservices/User-Microservice
     mem_limit: 250m
