@@ -1,0 +1,62 @@
+version: '2.1'
+
+services:
+
+  user:
+    build: video-sharing-microservices/User-Microservice
+    mem_limit: 250m
+    networks:
+      - my-network
+    ports:
+      - "8080:80"
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker-compose
+      - SPRING_CONFIG_LOCATION=file:/resources-config/application.yml,file:/resources-config/user.yml
+      - SPRING_RABBITMQ_USERNAME=${RABBITMQ_USER}
+      - SPRING_RABBITMQ_PASSWORD=${RABBITMQ_PASSWORD}
+      - SPRING_DATA_MONGODB_AUTHENTICATION_DATABASE=admin
+      - SPRING_DATA_MONGODB_USERNAME=${MONGODB_USER}
+      - SPRING_DATA_MONGODB_PASSWORD=${MONGODB_PASSWORD}
+    volumes:
+      - $PWD/resources-config:/resources-config
+    depends_on:
+      mongodb_users:
+        condition: service_healthy
+
+  mongodb_users:
+    image: mongo:3.6.9
+    mem_limit: 350m
+    networks:
+      - my-network
+    ports:
+      - "27017:27017"
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME=${MONGODB_USER}
+      - MONGO_INITDB_ROOT_PASSWORD=${MONGODB_PASSWORD}
+    command: mongod --smallfiles
+    healthcheck:
+      test: "mongo --eval 'db.stats().ok'"
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  rabbitmq:
+    image: rabbitmq:3.8.9-management
+    mem_limit: 250m
+    networks:
+      - my-network
+    ports:
+      - 5672:5672
+      - 15672:15672
+    environment:
+      - RABBITMQ_DEFAULT_USER=${RABBITMQ_USER}
+      - RABBITMQ_DEFAULT_PASS=${RABBITMQ_PASSWORD}
+    healthcheck:
+      test: ["CMD", "rabbitmqctl", "status"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+
+networks:
+  my-network:
+    name: my-network

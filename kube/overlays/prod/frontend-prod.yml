@@ -1,22 +1,19 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: user
+  name: frontend
 spec:
   selector:
     matchLabels:
-      app: user
+      app: frontend
   template:
     metadata:
       labels:
-        app: user
+        app: frontend
     spec:
       containers:
-      - name: user
-        image: acrekstest.azurecr.io/azure-user-microservice:2f856e8
-        env:
-        - name: SPRING_PROFILES_ACTIVE
-          value: "prod"
+      - name: frontend
+        image: acrekstest.azurecr.io/azure-frontend:2f856e8
         resources:
           requests:
             memory: "200Mi"

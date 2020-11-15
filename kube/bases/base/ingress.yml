@@ -1,4 +1,4 @@
-apiVersion: networking.k8s.io/v1
+apiVersion: networking.k8s.io/v1beta1
 kind: Ingress
 metadata:
   name: ingress-gateway
@@ -25,5 +25,17 @@ spec:
       - path: /api/v1/auth/.*
         backend:
           serviceName: user
+          servicePort: 80
+      - path: /api/v1/oauth2/.*
+        backend:
+          serviceName: user
+          servicePort: 80
+      - path: /api/v1/login/.*
+        backend:
+          serviceName: user
+          servicePort: 80
+      - path: /
+        backend:
+          serviceName: frontend
           servicePort: 80
 

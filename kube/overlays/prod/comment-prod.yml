@@ -13,7 +13,7 @@ spec:
     spec:
       containers:
       - name: comment
-        image: acrekstest.azurecr.io/azure-comment-microservice:1df0c9c
+        image: acrekstest.azurecr.io/azure-comment-microservice:2f856e8
         env:
         - name: SPRING_PROFILES_ACTIVE
           value: "prod"

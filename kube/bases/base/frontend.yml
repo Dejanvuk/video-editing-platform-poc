@@ -14,7 +14,7 @@ spec:
     spec:
       containers:
       - name: frontend-container
-        image: acrekstest.azurecr.io/azure-user-microservice:v1
+        image: acrekstest.azurecr.io/azure-frontend:v1
         imagePullPolicy: Always
         ports:
         - containerPort: 80

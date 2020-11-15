@@ -1,3 +1,6 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
 resources:
 - comment.yml
 - user.yml
@@ -6,3 +9,4 @@ resources:
 - comment-mongo.yml
 - user-mongo.yml
 - video-mongo.yml
+- frontend.yml

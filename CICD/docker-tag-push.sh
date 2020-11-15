@@ -5,6 +5,9 @@
 
 # ACR_LOGIN_SERVER=$ACR_LOGIN_SERVER
 : ${ACR_LOGIN_SERVER=acrekstest.azurecr.io}
+: ${ACR_NAME=acrEksTest}
+
+az acr login --name $ACR_NAME
 
 # The tag for production will be the unique and the first letters of the git commit hash
 
@@ -16,8 +19,12 @@ docker tag video-sharing-platform_comment $ACR_LOGIN_SERVER/azure-comment-micros
 
 docker tag video-sharing-platform_video $ACR_LOGIN_SERVER/azure-video-microservice:$TAG
 
+docker tag video-sharing-platform_frontend $ACR_LOGIN_SERVER/azure-frontend:$TAG
+
 docker push $ACR_LOGIN_SERVER/azure-user-microservice:$TAG
 
 docker push $ACR_LOGIN_SERVER/azure-comment-microservice:$TAG
 
 docker push $ACR_LOGIN_SERVER/azure-video-microservice:$TAG
+
+docker push $ACR_LOGIN_SERVER/azure-frontend:$TAG

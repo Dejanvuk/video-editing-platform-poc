@@ -59,8 +59,8 @@ kind: Service
 metadata:
   name: mongo-comment
 spec:
-  selector: mongo-comment-db
-  app: mongo
+  selector: 
+    app: mongo-comment-db
   ports:
     - port: 27017
       targetPort: 27017

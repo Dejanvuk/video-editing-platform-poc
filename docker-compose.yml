@@ -21,8 +21,11 @@ services:
       - SPRING_CONFIG_LOCATION=file:/resources-config/application.yml,file:/resources-config/user.yml
       - SPRING_RABBITMQ_USERNAME=${RABBITMQ_USER}
       - SPRING_RABBITMQ_PASSWORD=${RABBITMQ_PASSWORD}
+      - SPRING_DATA_MONGODB_AUTHENTICATION_DATABASE=admin
       - SPRING_DATA_MONGODB_USERNAME=${MONGODB_USER}
       - SPRING_DATA_MONGODB_PASSWORD=${MONGODB_PASSWORD}
+    volumes:
+      - $PWD/resources-config:/resources-config
     depends_on:
       mongodb_users:
         condition: service_healthy
@@ -56,8 +59,11 @@ services:
       - SPRING_CONFIG_LOCATION=file:/resources-config/application.yml,file:/resources-config/video.yml
       - SPRING_RABBITMQ_USERNAME=${RABBITMQ_USER}
       - SPRING_RABBITMQ_PASSWORD=${RABBITMQ_PASSWORD}
+      - SPRING_DATA_MONGODB_AUTHENTICATION_DATABASE=admin
       - SPRING_DATA_MONGODB_USERNAME=${MONGODB_USER}
       - SPRING_DATA_MONGODB_PASSWORD=${MONGODB_PASSWORD}
+    volumes:
+      - $PWD/resources-config:/resources-config
     depends_on:
       mongodb_videos:
         condition: service_healthy
@@ -93,8 +99,11 @@ services:
       - SPRING_CONFIG_LOCATION=file:/resources-config/application.yml,file:/resources-config/comment.yml
       - SPRING_RABBITMQ_USERNAME=${RABBITMQ_USER}
       - SPRING_RABBITMQ_PASSWORD=${RABBITMQ_PASSWORD}
+      - SPRING_DATA_MONGODB_AUTHENTICATION_DATABASE=admin
       - SPRING_DATA_MONGODB_USERNAME=${MONGODB_USER}
       - SPRING_DATA_MONGODB_PASSWORD=${MONGODB_PASSWORD}
+    volumes:
+      - $PWD/resources-config:/resources-config
     depends_on:
       mongodb_comments:
         condition: service_healthy

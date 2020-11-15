@@ -17,11 +17,16 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.security.oauth2.client.OAuth2ClientProperties;
+import org.springframework.boot.web.embedded.netty.NettyReactiveWebServerFactory;
+import org.springframework.boot.web.embedded.netty.NettyServerCustomizer;
+import org.springframework.boot.web.server.WebServer;
 import org.springframework.context.annotation.Bean;
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.http.*;
 import org.springframework.http.codec.json.AbstractJackson2Decoder;
 import org.springframework.http.codec.json.Jackson2JsonDecoder;
+import org.springframework.http.server.reactive.ContextPathCompositeHandler;
+import org.springframework.http.server.reactive.HttpHandler;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.http.server.reactive.ServerHttpResponse;
 import org.springframework.security.authentication.ReactiveAuthenticationManager;
@@ -50,19 +55,18 @@ import org.springframework.security.web.server.authorization.AuthorizationWebFil
 import org.springframework.security.web.server.context.NoOpServerSecurityContextRepository;
 import org.springframework.security.web.server.util.matcher.ServerWebExchangeMatchers;
 import org.springframework.util.MultiValueMap;
+import org.springframework.web.server.WebFilter;
 import org.springframework.web.util.UriComponentsBuilder;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+import reactor.netty.http.server.HttpServer;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @EnableWebFluxSecurity
 @EnableReactiveMethodSecurity
@@ -349,5 +353,28 @@ public class SecurityConfiguration {
         http.addFilterBefore(jwtAuthorizationFilter, SecurityWebFiltersOrder.HTTP_BASIC);
 
         return http.build();
+    }
+
+    @Bean
+    public NettyReactiveWebServerFactory nettyReactiveWebServerFactory() {
+        NettyReactiveWebServerFactory webServerFactory = new NettyReactiveWebServerFactory() {
+            @Override
+            public WebServer getWebServer(HttpHandler httpHandler) {
+                Map<String, HttpHandler> handlerMap = new HashMap<>();
+                handlerMap.put("/api/v1", httpHandler);
+                return super.getWebServer(new ContextPathCompositeHandler(handlerMap));
+            }
+        };
+        webServerFactory.addServerCustomizers(portCustomizer());
+        return webServerFactory;
+    }
+
+    public NettyServerCustomizer portCustomizer() {
+        return new NettyServerCustomizer() {
+            @Override
+            public HttpServer apply(HttpServer httpServer) {
+                return httpServer.port(80);
+            }
+        };
     }
 }
