@@ -3,6 +3,7 @@ kind: Kustomization
 
 bases:
 - ../../bases/base
+
 patchesStrategicMerge:
 - comment-prod.yml
 - user-prod.yml

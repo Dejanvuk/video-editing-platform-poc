@@ -17,34 +17,15 @@ kubectl create namespace $AKS_NAMESPACE
 
 kubectl config set-context --current --namespace=$AKS_NAMESPACE
 
-# Deploy a NGINX ingress controller in the AKS cluster (requires Helm 3+) 
-
-helm repo add ingress-nginx https://kubernetes.github.io/ingress-nginx
-
-helm install nginx-ingress ingress-nginx/ingress-nginx \
-    --set controller.replicaCount=2 \
-    --set controller.nodeSelector."beta\.kubernetes\.io/os"=linux \
-    --set defaultBackend.nodeSelector."beta\.kubernetes\.io/os"=linux \
-    --set controller.admissionWebhooks.patch.nodeSelector."beta\.kubernetes\.io/os"=linux
-
-sleep 10s
-
 # Store application configurations in configmaps for each service
 
-kubectl create configmap configmap-comment           --from-file=../resources-config/application.yml --from-file=../resources-config/comment.yml --save-config
-kubectl create configmap configmap-user    --from-file=../resources-config/application.yml --from-file=../resources-config/user.yml --save-config
-kubectl create configmap configmap-video           --from-file=../resources-config/application.yml --from-file=../resources-config/video.yml --save-config
+kubectl create configmap configmap-user    --from-file=resources-config/application.yml --from-file=resources-config/user.yml --save-config
 
 # The username and passwords to access various remote services are stored in secrets
 
 kubectl create secret generic rabbitmq-credentials \
     --from-literal=SPRING_RABBITMQ_USERNAME=rabbit-user \
     --from-literal=SPRING_RABBITMQ_PASSWORD=rabbit-password \
-    --save-config
-
-kubectl create secret generic rabbitmq-server-credentials \
-    --from-literal=RABBITMQ_DEFAULT_USER=rabbit-user \
-    --from-literal=RABBITMQ_DEFAULT_PASS=rabbit-password \
     --save-config
 
 kubectl create secret generic mongodb-credentials \
@@ -60,7 +41,9 @@ kubectl create secret generic mongodb-server-credentials \
 
 # Deploy all the resources
 
-kubectl apply -k overlays/prod
+kubectl apply -f deploy-db-stateful.yml
+sleep 30s
+kubectl apply -f user.yml
 
 kubectl wait --timeout=500s --for=condition=ready pod --all
 

@@ -34,21 +34,21 @@ spec:
         livenessProbe:
           httpGet:
             scheme: HTTP
-            path: /actuator/info
+            path: /api/v1/actuator/info
             port: 80
-          initialDelaySeconds: 10
+          initialDelaySeconds: 30
           periodSeconds: 10
-          timeoutSeconds: 2
+          timeoutSeconds: 5
           failureThreshold: 20
           successThreshold: 1
         readinessProbe:
           httpGet:
             scheme: HTTP
-            path: /actuator/health
+            path: /api/v1/actuator/health
             port: 80
-          initialDelaySeconds: 10
+          initialDelaySeconds: 30
           periodSeconds: 10
-          timeoutSeconds: 2
+          timeoutSeconds: 5
           failureThreshold: 3
           successThreshold: 1
         volumeMounts:

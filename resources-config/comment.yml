@@ -25,3 +25,5 @@ spring.rabbitmq.host: rabbitmq
 spring.profiles: prod
 
 spring.data.mongodb.host: mongo-comment
+
+spring.rabbitmq.host: rabbitmq

@@ -1,7 +1,7 @@
 #kind: StorageClass
 #apiVersion: storage.k8s.io/v1
 #metadata:
-#  name: mongo-user-sc
+#  name: rabbitmq-sc
 #provisioner: kubernetes.io/azure-disk
 #mountOptions:
 #  - dir_mode=0777
@@ -15,54 +15,54 @@
 #---
 
 # each replica pod gets a unique PersistentVolumeClaim associated with it
+
 apiVersion: apps/v1
 kind: StatefulSet
 metadata:
-  name: mongo-user
+  name: rabbitmq
 spec:
   selector:
     matchLabels:
-      app: mongo-user-db
-  serviceName: mongo-user
+      app: rabbitmq
+  serviceName: rabbitmq-service
   replicas: 1 
   template:
     metadata:
       labels:
-        app: mongo-user-db
+        app: rabbitmq
     spec:
       terminationGracePeriodSeconds: 60
       containers:
-      - name: mongo
-        image: mongo:4.0.21
+      - name: rabbitmq
+        image: rabbitmq:3.8.9-management
         envFrom:
           - secretRef:
-              name: mongodb-server-credentials
+              name: rabbitmq-server-credentials
         ports:
-        - containerPort: 27017
-          name: mongo
+        - containerPort: 15672
+        - containerPort: 5672
+          name: rabbitmq
         volumeMounts:
-        - name: mongo-volume
-          mountPath: /data/db
+        - name: rabbitmq-volume
+          mountPath: /etc/rabbitmq
   volumeClaimTemplates:
     - metadata:
-        name: mongo-volume
+        name: rabbitmq-volume
       spec:
         accessModes:
           - ReadWriteOnce
         storageClassName: managed-premium
         resources:
           requests:
-            storage: 5Gi
+            storage: 1Gi
 ---
 apiVersion: v1
 kind: Service
 metadata:
-  name: mongo-user
+  name: rabbitmq-service
 spec:
   selector: 
-    app: mongo-user-db
+    app: rabbitmq
   ports:
-    - port: 27017
-      targetPort: 27017
-
-
+    - port: 5672
+      targetPort: 5672

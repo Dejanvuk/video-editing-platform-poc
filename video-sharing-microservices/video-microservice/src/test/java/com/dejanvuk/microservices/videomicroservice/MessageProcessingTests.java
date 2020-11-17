@@ -10,11 +10,13 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.cloud.stream.messaging.Sink;
 import org.springframework.integration.channel.AbstractMessageChannel;
 import org.springframework.messaging.support.GenericMessage;
+import org.springframework.test.context.ActiveProfiles;
 
 import static com.dejanvuk.microservices.api.event.Event.Type.*;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDOM_PORT;
 
+@ActiveProfiles(profiles = "junit")
 @SpringBootTest(webEnvironment = RANDOM_PORT, properties = {"spring.data.mongodb.port=0"})
 public class MessageProcessingTests {
     @Autowired

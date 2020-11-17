@@ -13,7 +13,7 @@ spec:
     spec:
       containers:
       - name: frontend
-        image: acrekstest.azurecr.io/azure-frontend:2f856e8
+        image: acrekstest.azurecr.io/azure-frontend:9c1b87b
         resources:
           requests:
             memory: "200Mi"

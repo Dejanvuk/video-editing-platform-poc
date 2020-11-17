@@ -20,6 +20,7 @@ import org.springframework.boot.test.autoconfigure.web.reactive.AutoConfigureWeb
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.HttpStatus;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.reactive.server.WebTestClient;
 import reactor.core.publisher.Flux;
 
@@ -27,6 +28,7 @@ import static org.springframework.boot.test.context.SpringBootTest.WebEnvironmen
 import static org.springframework.http.HttpStatus.OK;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
 
+@ActiveProfiles(profiles = "junit")
 @AutoConfigureWebTestClient
 @SpringBootTest(webEnvironment=RANDOM_PORT, properties = {"spring.data.mongodb.port=0"})
 @ExtendWith(MockitoExtension.class)

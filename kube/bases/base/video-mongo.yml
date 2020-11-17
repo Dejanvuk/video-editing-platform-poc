@@ -1,55 +1,58 @@
-kind: StorageClass
-apiVersion: storage.k8s.io/v1
-metadata:
-  name: mongo-video
-provisioner: kubernetes.io/azure-file
-mountOptions:
-  - dir_mode=0777
-  - file_mode=0777
-  - uid=0
-  - gid=0
-  - mfsymlinks
-  - cache=strict
-parameters:
-  skuName: Standard_LRS
----
-apiVersion: v1
-kind: PersistentVolumeClaim
-metadata:
-  name: mongo-video
-spec:
-  accessModes:
-    - ReadWriteMany
-  storageClassName: mongo-video-sc
-  resources:
-    requests:
-      storage: 256Mi
----
+#kind: StorageClass
+#apiVersion: storage.k8s.io/v1
+#metadata:
+#  name: mongo-video-sc
+#provisioner: kubernetes.io/azure-disk
+#mountOptions:
+#  - dir_mode=0777
+#  - file_mode=0777
+#  - uid=0
+#  - gid=0
+#  - mfsymlinks
+#  - cache=strict
+#parameters:
+#  skuName: Standard_LRS
+#---
+
+# each replica pod gets a unique PersistentVolumeClaim associated with it
 apiVersion: apps/v1
-kind: Deployment
+kind: StatefulSet
 metadata:
   name: mongo-video
 spec:
   selector:
     matchLabels:
       app: mongo-video-db
+  serviceName: mongo-video
+  replicas: 1 
   template:
     metadata:
       labels:
         app: mongo-video-db
     spec:
+      terminationGracePeriodSeconds: 60
       containers:
-        - name: mongo-container
-          image: mongo
-          ports:
-            - containerPort: 27017
-          volumeMounts:
-            - name: mongo-volume
-              mountPath: /data/db
-      volumes:
+      - name: mongo
+        image: mongo:4.0.21
+        envFrom:
+          - secretRef:
+              name: mongodb-server-credentials
+        ports:
+        - containerPort: 27017
+          name: mongo
+        volumeMounts:
         - name: mongo-volume
-          persistentVolumeClaim:
-            claimName: mongo-video
+          mountPath: /data/db
+  volumeClaimTemplates:
+    - metadata:
+        name: mongo-volume
+      spec:
+        accessModes:
+          - ReadWriteOnce
+        storageClassName: managed-premium
+        resources:
+          requests:
+            storage: 5Gi
 ---
 apiVersion: v1
 kind: Service

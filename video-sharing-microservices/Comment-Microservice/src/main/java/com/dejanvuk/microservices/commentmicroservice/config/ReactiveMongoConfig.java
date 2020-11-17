@@ -25,26 +25,4 @@ public class ReactiveMongoConfig {
         return new ReactiveMongoTemplate(mongoClient, "comment-db");
     }
 
-    @Bean
-    public NettyReactiveWebServerFactory nettyReactiveWebServerFactory() {
-        NettyReactiveWebServerFactory webServerFactory = new NettyReactiveWebServerFactory() {
-            @Override
-            public WebServer getWebServer(HttpHandler httpHandler) {
-                Map<String, HttpHandler> handlerMap = new HashMap<>();
-                handlerMap.put("/api/v1", httpHandler);
-                return super.getWebServer(new ContextPathCompositeHandler(handlerMap));
-            }
-        };
-        webServerFactory.addServerCustomizers(portCustomizer());
-        return webServerFactory;
-    }
-
-    public NettyServerCustomizer portCustomizer() {
-        return new NettyServerCustomizer() {
-            @Override
-            public HttpServer apply(HttpServer httpServer) {
-                return httpServer.port(80);
-            }
-        };
-    }
 }

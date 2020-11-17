@@ -21,6 +21,7 @@ import org.springframework.boot.web.embedded.netty.NettyReactiveWebServerFactory
 import org.springframework.boot.web.embedded.netty.NettyServerCustomizer;
 import org.springframework.boot.web.server.WebServer;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Profile;
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.http.*;
 import org.springframework.http.codec.json.AbstractJackson2Decoder;
@@ -355,6 +356,7 @@ public class SecurityConfiguration {
         return http.build();
     }
 
+    @Profile("!junit")
     @Bean
     public NettyReactiveWebServerFactory nettyReactiveWebServerFactory() {
         NettyReactiveWebServerFactory webServerFactory = new NettyReactiveWebServerFactory() {

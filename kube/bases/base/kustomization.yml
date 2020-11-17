@@ -10,3 +10,4 @@ resources:
 - user-mongo.yml
 - video-mongo.yml
 - frontend.yml
+- rabbitmq.yml

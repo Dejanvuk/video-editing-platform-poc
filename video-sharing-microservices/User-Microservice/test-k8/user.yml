@@ -1,26 +1,26 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: comment
+  name: user
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: comment
+      app: user
   template:
     metadata:
       labels:
-        app: comment
+        app: user
     spec:
       containers:
-      - name: comment-container
-        image: acrekstest.azurecr.io/azure-comment-microservice:v1
+      - name: user-container
+        image: acrekstest.azurecr.io/user-microservice-tes:v1
         imagePullPolicy: Always
         env:
         - name: SPRING_PROFILES_ACTIVE
-          value: "dev"
+          value: "prod"
         - name: SPRING_CONFIG_LOCATION
-          value: file:/resources-config/application.yml,file:/resources-config/comment.yml
+          value: file:/resources-config/application.yml,file:/resources-config/user.yml
         envFrom:
         - secretRef:
             name: rabbitmq-credentials
@@ -36,7 +36,7 @@ spec:
             scheme: HTTP
             path: /api/v1/actuator/info
             port: 80
-          initialDelaySeconds: 30
+          initialDelaySeconds: 10
           periodSeconds: 10
           timeoutSeconds: 2
           failureThreshold: 20
@@ -46,26 +46,27 @@ spec:
             scheme: HTTP
             path: /api/v1/actuator/health
             port: 80
-          initialDelaySeconds: 30
+          initialDelaySeconds: 10
           periodSeconds: 10
-          timeoutSeconds: 5
+          timeoutSeconds: 2
           failureThreshold: 3
           successThreshold: 1
         volumeMounts:
-        - name: configmap-comment-volume
+        - name: configmap-user-volume
           mountPath: /resources-config
       volumes:
-      - name: configmap-comment-volume
+      - name: configmap-user-volume
         configMap:
-          name: configmap-comment
+          name: configmap-user
 ---
 apiVersion: v1
 kind: Service
 metadata:
-  name: comment
+  name: user
 spec:
   selector:
-    app: comment
+    app: user
+  type: NodePort
   ports:
   - port: 80
     targetPort: 80

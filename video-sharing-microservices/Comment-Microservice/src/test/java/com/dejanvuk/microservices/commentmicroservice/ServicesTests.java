@@ -11,6 +11,7 @@ import org.springframework.boot.test.autoconfigure.data.mongo.DataMongoTest;
 import org.springframework.boot.test.autoconfigure.web.reactive.AutoConfigureWebTestClient;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.HttpStatus;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.reactive.server.WebTestClient;
 import reactor.core.publisher.Mono;
 
@@ -22,6 +23,7 @@ import static org.springframework.http.HttpStatus.*;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+@ActiveProfiles(profiles = "junit")
 @AutoConfigureWebTestClient
 @SpringBootTest(webEnvironment=RANDOM_PORT, properties = {"spring.data.mongodb.port=0"})
 public class ServicesTests {
