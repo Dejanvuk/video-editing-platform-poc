@@ -1,0 +1,16 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: rabbitmq
+  labels:
+    name: rabbitmq
+data:
+  rabbitmq.conf: |-
+    loopback_users.guest = false
+    management.load_definitions = /etc/definitions/definitions.json
+    log.console = true
+    log.console.level = debug
+    log.exchange = true
+    log.exchange.level = debug
+  enabled_plugins: |-
+    [rabbitmq_management,rabbitmq_prometheus,rabbitmq_tracing].

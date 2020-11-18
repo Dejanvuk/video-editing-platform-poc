@@ -11,3 +11,5 @@ resources:
 - video-mongo.yml
 - frontend.yml
 - rabbitmq.yml
+- rabbitmq-configmap.yml
+- rabbitmq-secret.yml

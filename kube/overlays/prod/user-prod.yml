@@ -13,7 +13,7 @@ spec:
     spec:
       containers:
       - name: user
-        image: acrekstest.azurecr.io/azure-user-microservice:9c1b87b
+        image: acrekstest.azurecr.io/user-microservice-tes:v1
         env:
         - name: SPRING_PROFILES_ACTIVE
           value: "prod"

@@ -31,6 +31,8 @@ spec:
         app: mongo-comment-db
     spec:
       terminationGracePeriodSeconds: 60
+      securityContext:
+        runAsUser: 0
       containers:
       - name: mongo
         image: mongo:4.0.21

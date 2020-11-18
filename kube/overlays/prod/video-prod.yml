@@ -13,7 +13,7 @@ spec:
     spec:
       containers:
       - name: video
-        image: acrekstest.azurecr.io/azure-video-microservice:9c1b87b
+        image: acrekstest.azurecr.io/azure-video-microservice:bf1222b
         env:
         - name: SPRING_PROFILES_ACTIVE
           value: "prod"

@@ -1,53 +1,152 @@
-#kind: StorageClass
-#apiVersion: storage.k8s.io/v1
-#metadata:
-#  name: rabbitmq-sc
-#provisioner: kubernetes.io/azure-disk
-#mountOptions:
-#  - dir_mode=0777
-#  - file_mode=0777
-#  - uid=0
-#  - gid=0
-#  - mfsymlinks
-#  - cache=strict
-#parameters:
-#  skuName: Standard_LRS
-#---
-
-# each replica pod gets a unique PersistentVolumeClaim associated with it
-
+apiVersion: v1
+kind: Service
+metadata:
+  name: rabbitmq-service
+spec:
+  clusterIP: None
+  publishNotReadyAddresses: true
+  selector: 
+    app: rabbitmq
+  ports:
+    - name: http
+      protocol: TCP
+      port: 15672
+      targetPort: http
+    - name: amqp
+      protocol: TCP
+      port: 5672
+      targetPort: amqp
+    - name: epmd
+      protocol: TCP
+      port: 4369
+      targetPort: epmd
+---
 apiVersion: apps/v1
 kind: StatefulSet
 metadata:
   name: rabbitmq
+  labels:
+    app: rabbitmq
 spec:
+  replicas: 1
   selector:
     matchLabels:
       app: rabbitmq
-  serviceName: rabbitmq-service
-  replicas: 1 
+  serviceName: rabbitmq-service  
   template:
     metadata:
       labels:
         app: rabbitmq
     spec:
-      terminationGracePeriodSeconds: 60
-      containers:
-      - name: rabbitmq
-        image: rabbitmq:3.8.9-management
-        envFrom:
-          - secretRef:
-              name: rabbitmq-server-credentials
-        ports:
-        - containerPort: 15672
-        - containerPort: 5672
-          name: rabbitmq
+      initContainers:
+      - name: init-myservice
+        image: busybox:1.30.1
+        command: ['sh']
+        args:
+        - "-c"
+        - |
+          set -ex
+          cp /configmap/* /etc/rabbitmq 
+          echo "${RABBITMQ_ERLANG_COOKIE}" > /var/lib/rabbitmq/.erlang.cookie
+        env:
+        - name: POD_NAME
+          valueFrom:
+            fieldRef:
+              apiVersion: v1
+              fieldPath: metadata.name
+        - name: RABBITMQ_MNESIA_DIR
+          value: /var/lib/rabbitmq/mnesia/rabbit@$(POD_NAME).rabbitmq-secret-discovery.default.svc.cluster.local
+        - name: RABBITMQ_ERLANG_COOKIE
+          valueFrom:
+           secretKeyRef:
+              name: rabbitmq-secret
+              key: rabbitmq-erlang-cookie
         volumeMounts:
-        - name: rabbitmq-volume
-          mountPath: /etc/rabbitmq
+          - name: rabbitmq-config-map
+            mountPath: /configmap
+          - name: config
+            mountPath: /etc/rabbitmq
+          - name: data
+            mountPath: /var/lib/rabbitmq
+      containers:
+        - name: rabbitmq
+          image: rabbitmq:3.8.9-management
+          envFrom:
+            - secretRef:
+                name: rabbitmq-server-credentials
+          imagePullPolicy: IfNotPresent
+          lifecycle:
+            postStart:
+              exec:
+                command: ['sh', '-c', 'set -ex; apt-get update -y; apt install ca-certificates -y; apt-get install wget -y;']
+          ports:
+            - containerPort: 15672
+              name: http
+            - containerPort: 5672
+              name: amqp
+            - containerPort: 15692
+              name: prometheus
+          livenessProbe:
+            exec:
+              command:
+              - /bin/sh
+              - -c
+              - 'wget -O - -q --header "Authorization: Basic `echo -n \"$RABBIT_MANAGEMENT_USER:$RABBIT_MANAGEMENT_PASSWORD\"
+                | base64`" http://localhost:15672/api/healthchecks/node | grep -qF "{\"status\":\"ok\"}"'
+            failureThreshold: 6
+            initialDelaySeconds: 120
+            periodSeconds: 10
+            timeoutSeconds: 5
+          readinessProbe:
+            exec:
+              command:
+              - /bin/sh
+              - -c
+              - 'wget -O - -q --header "Authorization: Basic `echo -n \"$RABBIT_MANAGEMENT_USER:$RABBIT_MANAGEMENT_PASSWORD\"
+                | base64`" http://localhost:15672/api/healthchecks/node | grep -qF "{\"status\":\"ok\"}"'
+            failureThreshold: 6
+            initialDelaySeconds: 20
+            periodSeconds: 5
+            timeoutSeconds: 3
+          env:
+            - name: RABBITMQ_ERLANG_COOKIE
+              valueFrom:
+                secretKeyRef:
+                  name: rabbitmq-secret
+                  key: rabbitmq-erlang-cookie
+            - name: RABBIT_MANAGEMENT_USER
+              valueFrom:
+                secretKeyRef:
+                  name: rabbitmq-secret
+                  key: rabbitmq-management-username
+            - name: RABBIT_MANAGEMENT_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: rabbitmq-secret
+                  key: rabbitmq-management-password
+          volumeMounts:
+            - name: config
+              mountPath: /etc/rabbitmq
+            - name: definitions
+              mountPath: /etc/definitions
+              readOnly: true
+            - name: data
+              mountPath: /var/lib/rabbitmq
+      volumes:
+        - name: rabbitmq-config-map
+          configMap:
+            name: rabbitmq
+        - name: config
+          emptyDir: {}
+        - name: definitions
+          secret:
+            secretName: rabbitmq-secret
+            items:
+            - key: definitions.json
+              path: definitions.json
   volumeClaimTemplates:
     - metadata:
-        name: rabbitmq-volume
+        name: data
       spec:
         accessModes:
           - ReadWriteOnce
@@ -55,14 +154,4 @@ spec:
         resources:
           requests:
             storage: 1Gi
----
-apiVersion: v1
-kind: Service
-metadata:
-  name: rabbitmq-service
-spec:
-  selector: 
-    app: rabbitmq
-  ports:
-    - port: 5672
-      targetPort: 5672
+
