@@ -12,7 +12,7 @@ spec:
         app: video
     spec:
       containers:
-      - name: video
+      - name: video-container
         image: acrekstest.azurecr.io/azure-video-microservice:bf1222b
         env:
         - name: SPRING_PROFILES_ACTIVE

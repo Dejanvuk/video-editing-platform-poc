@@ -1,7 +1,7 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: rabbitmq-service
+  name: rabbitmq
 spec:
   clusterIP: None
   publishNotReadyAddresses: true
@@ -32,7 +32,7 @@ spec:
   selector:
     matchLabels:
       app: rabbitmq
-  serviceName: rabbitmq-service  
+  serviceName: rabbitmq
   template:
     metadata:
       labels:
@@ -48,6 +48,7 @@ spec:
           set -ex
           cp /configmap/* /etc/rabbitmq 
           echo "${RABBITMQ_ERLANG_COOKIE}" > /var/lib/rabbitmq/.erlang.cookie
+          chmod 666 /etc/rabbitmq/*
         env:
         - name: POD_NAME
           valueFrom:
@@ -91,7 +92,7 @@ spec:
               command:
               - /bin/sh
               - -c
-              - 'wget -O - -q --header "Authorization: Basic `echo -n \"$RABBIT_MANAGEMENT_USER:$RABBIT_MANAGEMENT_PASSWORD\"
+              - 'wget -O - -q --header "Authorization: Basic `echo -n \"$RABBITMQ_USERNAME:$RABBITMQ_PASSWORD\"
                 | base64`" http://localhost:15672/api/healthchecks/node | grep -qF "{\"status\":\"ok\"}"'
             failureThreshold: 6
             initialDelaySeconds: 120
@@ -102,7 +103,7 @@ spec:
               command:
               - /bin/sh
               - -c
-              - 'wget -O - -q --header "Authorization: Basic `echo -n \"$RABBIT_MANAGEMENT_USER:$RABBIT_MANAGEMENT_PASSWORD\"
+              - 'wget -O - -q --header "Authorization: Basic `echo -n \"$RABBITMQ_USERNAME:$RABBITMQ_PASSWORD\"
                 | base64`" http://localhost:15672/api/healthchecks/node | grep -qF "{\"status\":\"ok\"}"'
             failureThreshold: 6
             initialDelaySeconds: 20
@@ -114,16 +115,6 @@ spec:
                 secretKeyRef:
                   name: rabbitmq-secret
                   key: rabbitmq-erlang-cookie
-            - name: RABBIT_MANAGEMENT_USER
-              valueFrom:
-                secretKeyRef:
-                  name: rabbitmq-secret
-                  key: rabbitmq-management-username
-            - name: RABBIT_MANAGEMENT_PASSWORD
-              valueFrom:
-                secretKeyRef:
-                  name: rabbitmq-secret
-                  key: rabbitmq-management-password
           volumeMounts:
             - name: config
               mountPath: /etc/rabbitmq
@@ -139,11 +130,8 @@ spec:
         - name: config
           emptyDir: {}
         - name: definitions
-          secret:
-            secretName: rabbitmq-secret
-            items:
-            - key: definitions.json
-              path: definitions.json
+          configMap:
+            name: definitions-configmap
   volumeClaimTemplates:
     - metadata:
         name: data

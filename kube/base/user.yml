@@ -1,26 +1,30 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: video
+  name: user
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: video
+      app: user
   template:
     metadata:
       labels:
-        app: video
+        app: user
     spec:
+      initContainers:
+      - name: wait-for-mongodb-service
+        image: alpine
+        command: ["sh", "-c", "for i in $(seq 1 120); do nc -zvw1 mongo-user 27017 && exit 0 || sleep 5; done; exit 1"]
       containers:
-      - name: video-container
-        image: acrekstest.azurecr.io/azure-video-microservice:v1
+      - name: user-container
+        image: acrekstest.azurecr.io/azure-user-microservice:v1
         imagePullPolicy: Always
         env:
         - name: SPRING_PROFILES_ACTIVE
           value: "dev"
         - name: SPRING_CONFIG_LOCATION
-          value: file:/resources-config/application.yml,file:/resources-config/video.yml
+          value: file:/resources-config/application.yml,file:/resources-config/user.yml
         envFrom:
         - secretRef:
             name: rabbitmq-credentials
@@ -52,20 +56,20 @@ spec:
           failureThreshold: 3
           successThreshold: 1
         volumeMounts:
-        - name: configmap-video-volume
+        - name: configmap-user-volume
           mountPath: /resources-config
       volumes:
-      - name: configmap-video-volume
+      - name: configmap-user-volume
         configMap:
-          name: configmap-video
+          name: configmap-user
 ---
 apiVersion: v1
 kind: Service
 metadata:
-  name: video
+  name: user
 spec:
   selector:
-    app: video
+    app: user
   ports:
   - port: 80
     targetPort: 80

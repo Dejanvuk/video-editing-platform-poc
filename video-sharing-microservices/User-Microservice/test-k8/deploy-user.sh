@@ -23,11 +23,6 @@ kubectl create configmap configmap-user    --from-file=resources-config/applicat
 
 # The username and passwords to access various remote services are stored in secrets
 
-kubectl create secret generic rabbitmq-credentials \
-    --from-literal=SPRING_RABBITMQ_USERNAME=rabbit-user \
-    --from-literal=SPRING_RABBITMQ_PASSWORD=rabbit-password \
-    --save-config
-
 kubectl create secret generic mongodb-credentials \
     --from-literal=SPRING_DATA_MONGODB_AUTHENTICATION_DATABASE=admin \
     --from-literal=SPRING_DATA_MONGODB_USERNAME=mongodb-user \
@@ -41,9 +36,10 @@ kubectl create secret generic mongodb-server-credentials \
 
 # Deploy all the resources
 
-kubectl apply -f deploy-db-stateful.yml
-sleep 30s
 kubectl apply -f user.yml
+sleep 20s
+kubectl apply -f user-mongo.yml
+
 
 kubectl wait --timeout=500s --for=condition=ready pod --all
 

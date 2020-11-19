@@ -12,6 +12,10 @@ spec:
       labels:
         app: user
     spec:
+      initContainers:
+      - name: wait-for-mongodb-service
+        image: alpine
+        command: ["sh", "-c", "for i in $(seq 1 120); do nc -zvw1 mongo-user 27017 && exit 0 || sleep 5; done; exit 1"]
       containers:
       - name: user-container
         image: acrekstest.azurecr.io/user-microservice-tes:v1
@@ -22,8 +26,6 @@ spec:
         - name: SPRING_CONFIG_LOCATION
           value: file:/resources-config/application.yml,file:/resources-config/user.yml
         envFrom:
-        - secretRef:
-            name: rabbitmq-credentials
         - secretRef:
             name: mongodb-credentials
         ports:
@@ -36,9 +38,9 @@ spec:
             scheme: HTTP
             path: /api/v1/actuator/info
             port: 80
-          initialDelaySeconds: 10
+          initialDelaySeconds: 30
           periodSeconds: 10
-          timeoutSeconds: 2
+          timeoutSeconds: 5
           failureThreshold: 20
           successThreshold: 1
         readinessProbe:
@@ -46,9 +48,9 @@ spec:
             scheme: HTTP
             path: /api/v1/actuator/health
             port: 80
-          initialDelaySeconds: 10
+          initialDelaySeconds: 30
           periodSeconds: 10
-          timeoutSeconds: 2
+          timeoutSeconds: 5
           failureThreshold: 3
           successThreshold: 1
         volumeMounts:
@@ -66,7 +68,6 @@ metadata:
 spec:
   selector:
     app: user
-  type: NodePort
   ports:
   - port: 80
     targetPort: 80

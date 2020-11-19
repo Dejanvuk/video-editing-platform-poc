@@ -1,22 +1,19 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: comment
+  name: frontend
 spec:
   selector:
     matchLabels:
-      app: comment
+      app: frontend
   template:
     metadata:
       labels:
-        app: comment
+        app: frontend
     spec:
       containers:
-      - name: comment
-        image: acrekstest.azurecr.io/azure-comment-microservice:bf1222b
-        env:
-        - name: SPRING_PROFILES_ACTIVE
-          value: "prod"
+      - name: frontend-container
+        image: acrekstest.azurecr.io/azure-frontend:bf1222b
         resources:
           requests:
             memory: "200Mi"

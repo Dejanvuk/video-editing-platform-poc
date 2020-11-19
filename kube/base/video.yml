@@ -1,26 +1,30 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: comment
+  name: video
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: comment
+      app: video
   template:
     metadata:
       labels:
-        app: comment
+        app: video
     spec:
+      initContainers:
+      - name: wait-for-mongodb-service
+        image: alpine
+        command: ["sh", "-c", "for i in $(seq 1 120); do nc -zvw1 mongo-video 27017 && exit 0 || sleep 5; done; exit 1"]
       containers:
-      - name: comment-container
-        image: acrekstest.azurecr.io/azure-comment-microservice:v1
+      - name: video-container
+        image: acrekstest.azurecr.io/azure-video-microservice:v1
         imagePullPolicy: Always
         env:
         - name: SPRING_PROFILES_ACTIVE
           value: "dev"
         - name: SPRING_CONFIG_LOCATION
-          value: file:/resources-config/application.yml,file:/resources-config/comment.yml
+          value: file:/resources-config/application.yml,file:/resources-config/video.yml
         envFrom:
         - secretRef:
             name: rabbitmq-credentials
@@ -38,7 +42,7 @@ spec:
             port: 80
           initialDelaySeconds: 30
           periodSeconds: 10
-          timeoutSeconds: 2
+          timeoutSeconds: 5
           failureThreshold: 20
           successThreshold: 1
         readinessProbe:
@@ -52,20 +56,20 @@ spec:
           failureThreshold: 3
           successThreshold: 1
         volumeMounts:
-        - name: configmap-comment-volume
+        - name: configmap-video-volume
           mountPath: /resources-config
       volumes:
-      - name: configmap-comment-volume
+      - name: configmap-video-volume
         configMap:
-          name: configmap-comment
+          name: configmap-video
 ---
 apiVersion: v1
 kind: Service
 metadata:
-  name: comment
+  name: video
 spec:
   selector:
-    app: comment
+    app: video
   ports:
   - port: 80
     targetPort: 80

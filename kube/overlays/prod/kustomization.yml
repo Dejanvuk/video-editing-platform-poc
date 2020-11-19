@@ -1,12 +1,10 @@
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
-
 bases:
-- ../../bases/base
-
+- ../../base
 patchesStrategicMerge:
-- comment-prod.yml
-- user-prod.yml
+- comment.yml
+- user.yml
 - video-prod.yml
-- frontend-prod.yml
+- frontend.yml
 

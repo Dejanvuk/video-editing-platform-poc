@@ -1,26 +1,30 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: user
+  name: comment
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: user
+      app: comment
   template:
     metadata:
       labels:
-        app: user
+        app: comment
     spec:
+      initContainers:
+      - name: wait-for-mongodb-service
+        image: alpine
+        command: ["sh", "-c", "for i in $(seq 1 120); do nc -zvw1 mongo-comment 27017 && exit 0 || sleep 5; done; exit 1"]
       containers:
-      - name: user-container
-        image: acrekstest.azurecr.io/azure-user-microservice:v1
+      - name: comment-container
+        image: acrekstest.azurecr.io/azure-comment-microservice:v1
         imagePullPolicy: Always
         env:
         - name: SPRING_PROFILES_ACTIVE
           value: "dev"
         - name: SPRING_CONFIG_LOCATION
-          value: file:/resources-config/application.yml,file:/resources-config/user.yml
+          value: file:/resources-config/application.yml,file:/resources-config/comment.yml
         envFrom:
         - secretRef:
             name: rabbitmq-credentials
@@ -38,7 +42,7 @@ spec:
             port: 80
           initialDelaySeconds: 30
           periodSeconds: 10
-          timeoutSeconds: 5
+          timeoutSeconds: 2
           failureThreshold: 20
           successThreshold: 1
         readinessProbe:
@@ -52,20 +56,20 @@ spec:
           failureThreshold: 3
           successThreshold: 1
         volumeMounts:
-        - name: configmap-user-volume
+        - name: configmap-comment-volume
           mountPath: /resources-config
       volumes:
-      - name: configmap-user-volume
+      - name: configmap-comment-volume
         configMap:
-          name: configmap-user
+          name: configmap-comment
 ---
 apiVersion: v1
 kind: Service
 metadata:
-  name: user
+  name: comment
 spec:
   selector:
-    app: user
+    app: comment
   ports:
   - port: 80
     targetPort: 80

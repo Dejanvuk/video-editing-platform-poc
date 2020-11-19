@@ -31,9 +31,10 @@ sleep 10s
 
 # Store application configurations in configmaps for each service
 
-kubectl create configmap configmap-comment           --from-file=../resources-config/application.yml --from-file=../resources-config/comment.yml --save-config
-kubectl create configmap configmap-user    --from-file=../resources-config/application.yml --from-file=../resources-config/user.yml --save-config
-kubectl create configmap configmap-video           --from-file=../resources-config/application.yml --from-file=../resources-config/video.yml --save-config
+kubectl create configmap configmap-comment --from-file=../resources-config/application.yml --from-file=../resources-config/comment.yml --save-config
+kubectl create configmap configmap-user --from-file=../resources-config/application.yml --from-file=../resources-config/user.yml --save-config
+kubectl create configmap configmap-video --from-file=../resources-config/application.yml --from-file=../resources-config/video.yml --save-config
+kubectl create configmap definitions-configmap --from-file=../rabbitmq-definition/definitions.json --save-config
 
 # The username and passwords to access various remote services are stored in secrets
 
@@ -43,8 +44,8 @@ kubectl create secret generic rabbitmq-credentials \
     --save-config
 
 kubectl create secret generic rabbitmq-server-credentials \
-    --from-literal=RABBITMQ_DEFAULT_USER=rabbit-user \
-    --from-literal=RABBITMQ_DEFAULT_PASS=rabbit-password \
+    --from-literal=RABBITMQ_USERNAME=rabbit-user \
+    --from-literal=RABBITMQ_PASSWORD=rabbit-password \
     --save-config
 
 kubectl create secret generic mongodb-credentials \
