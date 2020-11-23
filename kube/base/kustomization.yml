@@ -13,3 +13,4 @@ resources:
 - rabbitmq.yml
 - rabbitmq-configmap.yml
 - rabbitmq-secret.yml
+- jenkins.yml
