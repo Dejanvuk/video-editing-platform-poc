@@ -38,6 +38,12 @@ spring:
             scope:
               - email
               - public_profile
+          github:
+            clientId: 42c0cf27f71631940547
+            clientSecret: 4dd86d3db8824c859d35d896da4fa6c7201bd215
+            scope:
+              - user:email
+              - read:user
         provider:
           facebook:
             authorizationUri: https://www.facebook.com/v8.0/dialog/oauth

@@ -56,6 +56,9 @@ import org.springframework.security.web.server.authorization.AuthorizationWebFil
 import org.springframework.security.web.server.context.NoOpServerSecurityContextRepository;
 import org.springframework.security.web.server.util.matcher.ServerWebExchangeMatchers;
 import org.springframework.util.MultiValueMap;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.reactive.CorsConfigurationSource;
+import org.springframework.web.cors.reactive.UrlBasedCorsConfigurationSource;
 import org.springframework.web.server.WebFilter;
 import org.springframework.web.util.UriComponentsBuilder;
 import reactor.core.publisher.Flux;
@@ -378,5 +381,22 @@ public class SecurityConfiguration {
                 return httpServer.port(80);
             }
         };
+    }
+
+    @Bean
+    CorsConfigurationSource corsConfiguration() {
+        CorsConfiguration corsConfig = new CorsConfiguration();
+        corsConfig.applyPermitDefaultValues();
+        corsConfig.setAllowedMethods(List.of("GET", "POST", "PUT", "OPTIONS", "DELETE", "PATCH"));
+        corsConfig.setAllowedHeaders(List.of("Origin", "Content-Type", "Accept", "Authorization"));
+        corsConfig.addExposedHeader("Authorization");
+        corsConfig.setAllowCredentials(true);
+        corsConfig.setMaxAge((long) 3600);
+        corsConfig.setAllowedOrigins(Arrays.asList("*"));
+
+        UrlBasedCorsConfigurationSource source =
+                new UrlBasedCorsConfigurationSource();
+        source.registerCorsConfiguration("/**", corsConfig);
+        return source;
     }
 }

@@ -1,4 +1,4 @@
-import React, { FC, useEffect } from 'react';
+import React, { FC } from 'react';
 
 import TopBar from '../TopBar';
 
@@ -8,14 +8,12 @@ import MediaBrowser from '../MediaBrowser';
 import EditPanel from '../EditPanel';
 import Footer from '../Footer';
 
+import { useOauth2 } from '../common/hooks/Oauth2Hook';
+
 import './style.css';
 
 const App: FC = () => {
-  useEffect(() => {
-    const windowUrl = window.location.search;
-    const params = new URLSearchParams(windowUrl);
-    console.log(params.get('jwt'));
-  }, []);
+  useOauth2();
 
   return (
     <div id="main-app">

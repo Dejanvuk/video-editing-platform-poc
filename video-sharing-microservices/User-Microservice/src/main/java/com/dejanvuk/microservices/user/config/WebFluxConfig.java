@@ -10,6 +10,8 @@ import org.springframework.web.reactive.resource.WebJarsResourceResolver;
 @Configuration
 @EnableWebFlux
 public class WebFluxConfig implements WebFluxConfigurer {
+    // Not effective after using Spring Security.
+    // To be removed
     @Override
     public void addCorsMappings(CorsRegistry corsRegistry) {
         corsRegistry.addMapping("/**")
