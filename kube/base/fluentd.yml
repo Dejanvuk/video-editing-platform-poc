@@ -1,0 +1,67 @@
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: fluentd-volume-claim
+spec:
+  accessModes:
+  - ReadWriteOnce
+  storageClassName: managed-premium
+  resources:
+    requests:
+      storage: 5Gi
+---
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: fluentd
+  namespace: kube-system
+  labels:
+    app: fluentd
+    kubernetes.io/cluster-service: "true"
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: fluentd
+  template:
+    metadata:
+      labels:
+        app: fluentd
+        kubernetes.io/cluster-service: "true"
+    spec:
+      serviceAccount: fluentd
+      serviceAccountName: fluentd
+      tolerations:
+      - key: node-role.kubernetes.io/master
+      effect: NoSchedule
+      containers:
+      - name: fluentd
+        image: fluent/fluentd-kubernetes-daemonset:v1.11.5-debian-elasticsearch7-1.1
+        imagePullPolicy: Always
+        env:
+        - name:  FLUENT_ELASTICSEARCH_HOST
+          value: "elasticsearch.logging"
+        - name: FLUENT_ELASTICSEARCH_PORT
+          value: "9200"
+        - name: FLUENT_ELASTICSEARCH_SCHEME
+          value: "http"
+        - name: FLUENT_UID
+          value: "0"
+        ports:
+        - containerPort: 9200
+        resources:
+          limits:
+            memory: 300Mi
+        volumeMounts:
+        - name: fluentd-volume
+          mountPath: /var/log
+          readOnly: true
+          subPath: varlogs
+        - name: fluentd-volume
+          mountPath: /var/lib/docker/containers
+          readOnly: true
+          subPath: varlibdockercontainers
+      containers:
+      - name: fluentd-volume
+        persistentVolumeClaim:
+          claimName: fluentd-volume-claim

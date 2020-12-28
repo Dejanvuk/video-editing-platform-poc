@@ -1,0 +1,33 @@
+img.avi {
+  max-width: 100px;
+  margin-top: -7px;
+  border-radius: 50%;
+  height: 52px;
+  width: 52px;
+  margin-right: 12px;
+}
+
+.settings-inputs {
+  width: 300px;
+  margin: 0px;
+  height: 40px;
+  background-color: rgb(53, 53, 53);
+  border-width: 0px;
+  border: none;
+}
+
+.settings-form {
+  margin: 20px;
+}
+
+.settings-h4 {
+  margin-top: 2px;
+  margin-bottom: 2px;
+}
+
+.or-seperator {
+  margin-top: 35px;
+  margin-bottom: 35px;
+  width: 100%;
+  border-top: 1px solid gray;
+}

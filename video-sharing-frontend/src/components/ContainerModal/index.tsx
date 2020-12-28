@@ -1,6 +1,8 @@
-import React, { FC, useState, useRef } from 'react';
+import React, { FC, useState, useRef, ReactElement } from 'react';
 
 import { MODALS } from '../common/enums/modals';
+
+import { REDIRECT_URI } from '../common/util/constants/oauth2';
 
 // import { useKeyPress } from '../common/hooks';
 
@@ -45,6 +47,29 @@ const ContainerModal: FC = () => {
     }
   };
 
+  const getSettings = (): ReactElement | null => {
+    if (localStorage.getItem('jwt')) {
+      // show the Settings button
+      return (
+        <button type="button" onClick={() => showModal(MODALS.settings)}>
+          Settings
+        </button>
+      );
+    }
+    return null;
+  };
+
+  const getUserStatus = (): boolean => {
+    return localStorage.getItem('jwt') !== null;
+  };
+
+  const logout = (): void => {
+    // clear everything from local storage
+    localStorage.clear();
+    // redirect the user to home page
+    window.location.href = `${REDIRECT_URI}`;
+  };
+
   return (
     <>
       <div className="menu-bar">
@@ -83,9 +108,16 @@ const ContainerModal: FC = () => {
           <button type="button">More</button>
         </span>
         <span className="bar-about">
-          <button type="button" onClick={() => showModal(MODALS.login)}>
-            Login
-          </button>
+          {getSettings()}
+          {getUserStatus() ? (
+            <button type="button" onClick={() => logout()}>
+              Logout
+            </button>
+          ) : (
+            <button type="button" onClick={() => showModal(MODALS.login)}>
+              Login
+            </button>
+          )}
         </span>
       </div>
 

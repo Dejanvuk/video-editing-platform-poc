@@ -1,7 +1,11 @@
-import { useEffect } from 'react';
+import { useLayoutEffect } from 'react';
 import axios from 'axios';
 
-import { API_BASE_URL, API_USER_URL } from '../util/constants/oauth2';
+import {
+  API_BASE_URL,
+  API_USER_URL,
+  REDIRECT_URI,
+} from '../util/constants/oauth2';
 
 type USVString = string;
 
@@ -19,6 +23,12 @@ async function processUserDetails(jwt: USVString): Promise<void> {
     });
 
     console.log(userDetails);
+    if (userDetails.name !== null)
+      await localStorage.setItem('name', userDetails.name);
+    await localStorage.setItem('email', userDetails.email);
+    await localStorage.setItem('imageUrl', userDetails.imageUrl);
+    // redirect the user to home page
+    window.location.href = `${REDIRECT_URI}`;
   } catch (e) {
     console.error(e.response.data);
   }
@@ -26,11 +36,12 @@ async function processUserDetails(jwt: USVString): Promise<void> {
 
 export function useOauth2(): void {
   // Called during initial client request of the page and after every oauth redirect from server
-  useEffect(() => {
+  useLayoutEffect(() => {
     const windowUrl = window.location.search;
     const params = new URLSearchParams(windowUrl);
     const jwt = params.get('jwt');
     if (jwt != null) {
+      localStorage.setItem('jwt', jwt);
       processUserDetails(jwt);
     }
   }, []);

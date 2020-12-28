@@ -6,6 +6,7 @@ import FocusTrap from 'focus-trap-react';
 
 import Login from '../Login';
 import Signup from '../Signup';
+import Settings from '../Settings';
 
 import { MODALS } from '../common/enums/modals';
 
@@ -32,6 +33,9 @@ const getModalType = (type: number): ReactElement | null => {
       break;
     case MODALS.signup:
       return <Signup />;
+      break;
+    case MODALS.settings:
+      return <Settings />;
       break;
     default:
       return null;

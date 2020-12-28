@@ -4,4 +4,5 @@ export enum MODALS {
   import,
   login,
   signup,
+  settings,
 }
