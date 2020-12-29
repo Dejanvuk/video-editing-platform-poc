@@ -13,6 +13,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.cloud.stream.annotation.EnableBinding;
+import org.springframework.cloud.stream.annotation.Output;
+import org.springframework.messaging.MessageChannel;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
@@ -24,37 +27,62 @@ import static reactor.core.publisher.Mono.error;
 import java.time.Duration;
 import java.util.Collections;
 
+@EnableBinding(UserService.MessageSources.class)
 @Service
 public class UserService implements IUserService {
 
     private static final Logger log = LoggerFactory.getLogger(UserService.class);
 
-    @Autowired
     UserRepository userRepository;
 
-    @Autowired
     PasswordEncoder passwordEncoder;
 
-    @Autowired
     RoleRepository roleRepository;
 
-    @Autowired
     JwtTokenUtility jwtTokenUtility;
 
-    @Autowired
     UserEntityMapper userEntityMapper;
 
-    @Value("${app.COMMENT_SERVICE_MAX_TIMEOUT}")
     int COMMENT_SERVICE_MAX_TIMEOUT;
 
-    @Value("${app.VIDEO_SERVICE_MAX_TIMEOUT}")
     int VIDEO_SERVICE_MAX_TIMEOUT;
 
-    @Value("${app.VIDEO_SERVICE_URL}")
     private String VIDEO_SERVICE_URL;
 
-    @Value("${app.COMMENT_SERVICE_URL}")
     private String COMMENT_SERVICE_URL;
+
+    private final MessageSources messageSources;
+
+    public interface MessageSources {
+
+        String OUTPUT_VIDEOS = "output-videos";
+        String OUTPUT_COMMENTS = "output-comments";
+
+        @Output(OUTPUT_VIDEOS)
+        MessageChannel outputVideos();
+
+        @Output(OUTPUT_COMMENTS)
+        MessageChannel outputComments();
+    }
+
+    public UserService(UserRepository userRepository, PasswordEncoder passwordEncoder, RoleRepository roleRepository,
+                       JwtTokenUtility jwtTokenUtility, UserEntityMapper userEntityMapper,
+                       @Value("${app.COMMENT_SERVICE_MAX_TIMEOUT}") int COMMENT_SERVICE_MAX_TIMEOUT,
+                       @Value("${app.VIDEO_SERVICE_MAX_TIMEOUT}") int VIDEO_SERVICE_MAX_TIMEOUT,
+                       @Value("${app.VIDEO_SERVICE_URL}") String VIDEO_SERVICE_URL,
+                       @Value("${app.COMMENT_SERVICE_URL}") String COMMENT_SERVICE_URL,
+                       MessageSources messageSources) {
+        this.userRepository = userRepository;
+        this.passwordEncoder = passwordEncoder;
+        this.roleRepository = roleRepository;
+        this.jwtTokenUtility = jwtTokenUtility;
+        this.userEntityMapper = userEntityMapper;
+        this.COMMENT_SERVICE_MAX_TIMEOUT = COMMENT_SERVICE_MAX_TIMEOUT;
+        this.VIDEO_SERVICE_MAX_TIMEOUT = VIDEO_SERVICE_MAX_TIMEOUT;
+        this.VIDEO_SERVICE_URL = VIDEO_SERVICE_URL;
+        this.COMMENT_SERVICE_URL = COMMENT_SERVICE_URL;
+        this.messageSources = messageSources;
+    }
 
     @Override
     public Mono<UserEntity> create(SignUpPayload signUpPayload) {

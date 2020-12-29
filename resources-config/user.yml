@@ -65,6 +65,15 @@ api:
       email: my-email@yahoo.com
   controllers: aaa
 
+spring.cloud.stream:
+  defaultBinder: rabbit
+  default.contentType: application/json
+  bindings:
+    output-comments:
+      destination: comments
+    output-videos:
+      destination: videos
+
 resilience4j.circuitbreaker:
   backends:
     user:
